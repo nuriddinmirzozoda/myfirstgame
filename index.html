@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA Dushanbe 3D — Шаҳри пурра</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #00ffcc;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 204, 0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        #ui div {
+            margin-bottom: 5px;
+        }
+
+        #minimap-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 160px;
+            height: 160px;
+            border: 3px solid #00ffcc;
+            border-radius: 50%;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10;
+        }
+
+        #minimap {
+            width: 100%;
+            height: 100%;
+        }
+
+        #action-prompt {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ffcc;
+            font-size: 20px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: 2px solid #00ffcc;
+            display: none;
+            z-index: 15;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,255,204,0.4);
+        }
+
+        #damage-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            z-index: 5;
+        }
+
+        #dialog-box {
+            position: absolute;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid #e74c3c;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 16;
+            text-align: center;
+        }
+
+        .nametag {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(0, 255, 204, 0.95);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            display: none;
+            white-space: nowrap;
+            z-index: 12;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        #instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            text-align: center;
+            font-size: 20px;
+            background: rgba(15, 15, 25, 0.95);
+            padding: 30px 50px;
+            border-radius: 15px;
+            cursor: pointer;
+            z-index: 20;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.4);
+        }
+
+        #instructions h1 {
+            margin-top: 0;
+            color: #00ffcc;
+        }
+
+        #game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff3333;
+            text-align: center;
+            font-size: 30px;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            z-index: 30;
+            border: 2px solid #ff3333;
+        }
+    #bigmap {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 25;
+            border: 3px solid #00ffcc;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+            pointer-events: none;
+        }
+        #bigmap canvas { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="crosshair"></div>
+    <div id="damage-overlay"></div>
+    <div id="action-prompt"></div>
+    <div id="dialog-box"></div>
+    
+    <div id="ui">
+        <div>Саломатӣ (HP): <span id="health" style="color: #00ff00;">100</span></div>
+        <div>Одамони афтида: <span id="score" style="color: #00ffcc;">0</span></div>
+        <div>Ҳолат: <span id="mode" style="color: #ffaa00;">Пиёда дар Шаҳр</span></div>
+        <div>Ҳолати шаҳр: <span id="wanted" style="color: #00ffcc;">Ором</span></div>
+    </div>
+
+    <div id="bigmap"><canvas id="bigmap-canvas" width="700" height="700"></canvas></div>
+
+    <div id="minimap-container">
+        <canvas id="minimap" width="160" height="160"></canvas>
+    </div>
+
+    <div id="instructions">
+        <h1>GTA DUSHANBE CITY 3D</h1>
+        <p>Барои оғози бозӣ клик кунед</p>
+        <hr style="border-color: #333; margin: 15px 0;">
+        <p style="font-size: 16px; color: #ccc;">
+            <b>WASD</b> — Ҳаракат / Рондан | <b>SPACE</b> — Паридан<br>
+            <b>E</b> — Нишастан / Баромадан аз Bugatti | <b>F</b> — Даромадан ба ДДТТ (Синфхонаи №29) / Дом / Бозор<br>
+            <b>Муш</b> — Камера (дар мошин ҳам давр мезанад) / Тирпарронӣ | <b>M</b> — Харитаи калон
+        </p>
+    </div>
+
+    <div id="game-over">
+        <h1>ШУМО ШИКАСТ ХӮРДЕД!</h1>
+        <button onclick="location.reload()" style="padding: 10px 20px; font-size: 18px; cursor: pointer; background: #00ffcc; border: none; border-radius: 5px; font-weight: bold;">Аз нав оғоз кардан</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
+    <script>
+        // --- 1. Танзимоти саҳна ва Ҷаҳон ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xbfe3f7);
+        scene.fog = new THREE.FogExp2(0xbfe3f7, 0.0008);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2600);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // --- 2. Рӯшноӣ ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xfff5cc, 1.2);
+        const SUN_DIR = new THREE.Vector3(500, 380, 350).normalize();
+        sunLight.position.copy(SUN_DIR).multiplyScalar(500);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        const sc = sunLight.shadow.camera;
+        sc.left = -170; sc.right = 170; sc.top = 170; sc.bottom = -170; sc.near = 10; sc.far = 1200; sc.updateProjectionMatrix();
+        sunLight.shadow.bias = -0.0005;
+        scene.add(sunLight, sunLight.target);
+
+        // --- 3. Генератори Текстураҳо ва Номгузорӣ ---
+        function createCustomTexture(text1, text2, bgColor = '#111122', textColor = '#00ffcc') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, 512, 128);
+            ctx.strokeStyle = textColor;
+            ctx.lineWidth = 8;
+            ctx.strokeRect(4, 4, 504, 120);
+
+            if (text1) {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(text1, 256, text2 ? 45 : 70);
+            }
+
+            if (text2) {
+                ctx.fillStyle = textColor;
+                ctx.font = 'bold 28px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(text2, 256, 95);
+            }
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // --- 4. Замин ва Роҳҳо ---
+        const mapSize = 1000;
+        const groundGeo = new THREE.PlaneGeometry(mapSize * 3, mapSize * 3);
+        const groundMat = new THREE.MeshLambertMaterial({ color: 0x2e6f28 });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        const roadGroup = new THREE.Group();
+        const roadMat = new THREE.MeshLambertMaterial({ color: 0x222225 });
+        const lineMatYellow = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+        const zebraMatWhite = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+        function createRoadSegment(x, z, width, length, isHorizontal) {
+            const road = new THREE.Mesh(new THREE.PlaneGeometry(width, length), roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.set(x, 0.02, z);
+            road.receiveShadow = true;
+            roadGroup.add(road);
+
+            const centerLine = new THREE.Mesh(new THREE.PlaneGeometry(isHorizontal ? width : 0.4, isHorizontal ? 0.4 : length), lineMatYellow);
+            centerLine.rotation.x = -Math.PI / 2;
+            centerLine.position.set(x, 0.03, z);
+            roadGroup.add(centerLine);
+
+            if (Math.abs(x) < 300 && Math.abs(z) < 300) {
+                for (let i = -6; i <= 6; i += 2) {
+                    const zebra = new THREE.Mesh(new THREE.PlaneGeometry(isHorizontal ? 1.2 : 6, isHorizontal ? 6 : 1.2), zebraMatWhite);
+                    zebra.rotation.x = -Math.PI / 2;
+                    zebra.position.set(isHorizontal ? x + i : x, 0.04, isHorizontal ? z : z + i);
+                    roadGroup.add(zebra);
+                }
+            }
+        }
+
+        for (let pos = -300; pos <= 300; pos += 150) {
+            createRoadSegment(0, pos, mapSize, 18, true);
+            createRoadSegment(pos, 0, 18, mapSize, false);
+        }
+        scene.add(roadGroup);
+
+        // --- 4б. Осмон: гунбази осмон, офтоб ва абрҳои ҳаракаткунанда ---
+        const skyDome = new THREE.Mesh(
+            new THREE.SphereGeometry(1800, 24, 16),
+            new THREE.ShaderMaterial({
+                side: THREE.BackSide, depthWrite: false, fog: false,
+                uniforms: { top: { value: new THREE.Color(0x2f7fd8) }, mid: { value: new THREE.Color(0x8cc8f0) }, bottom: { value: new THREE.Color(0xbfe3f7) } },
+                vertexShader: 'varying float vY; void main(){ vY = normalize(position).y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+                fragmentShader: 'uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; varying float vY; void main(){ vec3 c = mix(bottom, mid, smoothstep(0.0, 0.25, vY)); c = mix(c, top, smoothstep(0.2, 0.9, vY)); gl_FragColor = vec4(c, 1.0); }'
+            })
+        );
+        skyDome.frustumCulled = false; skyDome.renderOrder = -10;
+        scene.add(skyDome);
+
+        function makeGlowTexture() {
+            const c = document.createElement('canvas'); c.width = c.height = 256;
+            const g = c.getContext('2d');
+            const grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+            grad.addColorStop(0, 'rgba(255,255,235,1)'); grad.addColorStop(0.18, 'rgba(255,240,170,0.95)');
+            grad.addColorStop(0.4, 'rgba(255,220,120,0.35)'); grad.addColorStop(1, 'rgba(255,200,100,0)');
+            g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
+            return new THREE.CanvasTexture(c);
+        }
+        const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), fog: false, depthWrite: false, transparent: true }));
+        sunGlow.scale.set(520, 520, 1);
+        const sunDisc = new THREE.Mesh(new THREE.SphereGeometry(38, 24, 16), new THREE.MeshBasicMaterial({ color: 0xfff6c8, fog: false }));
+        const sunGroup = new THREE.Group();
+        sunGroup.add(sunDisc, sunGlow);
+        scene.add(sunGroup);
+
+        const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x9fb4c8, fog: false });
+        const cloudGeo = new THREE.SphereGeometry(1, 12, 9);
+        const clouds = [];
+        for (let i = 0; i < 28; i++) {
+            const cloud = new THREE.Group();
+            const puffs = 5 + Math.floor(Math.random() * 4);
+            for (let p = 0; p < puffs; p++) {
+                const puff = new THREE.Mesh(cloudGeo, cloudMat);
+                const r = 12 + Math.random() * 14;
+                puff.scale.set(r * 1.4, r * 0.7, r);
+                puff.position.set((p - puffs / 2) * 16 + Math.random() * 6, Math.random() * 6, (Math.random() - 0.5) * 18);
+                cloud.add(puff);
+            }
+            cloud.position.set((Math.random() - 0.5) * 2000, 120 + Math.random() * 70, (Math.random() - 0.5) * 2000);
+            cloud.userData.speed = 4 + Math.random() * 6;
+            scene.add(cloud);
+            clouds.push(cloud);
+        }
+
+        // Кӯҳҳои атрофи Душанбе
+        const mountainMat = new THREE.MeshLambertMaterial({ color: 0x6f8097, flatShading: true });
+        const snowMat = new THREE.MeshLambertMaterial({ color: 0xf2f6fa, flatShading: true });
+        for (let i = 0; i < 46; i++) {
+            const ang = (i / 46) * Math.PI * 2 + Math.random() * 0.1;
+            const rad = 1150 + Math.random() * 150;
+            const mh = 160 + Math.random() * 220, mr = 130 + Math.random() * 90;
+            const m = new THREE.Mesh(new THREE.ConeGeometry(mr, mh, 7), mountainMat);
+            m.position.set(Math.cos(ang) * rad, mh / 2 - 2, Math.sin(ang) * rad);
+            scene.add(m);
+            const cap = new THREE.Mesh(new THREE.ConeGeometry(mr * 0.31, mh * 0.3, 7), snowMat);
+            cap.position.set(m.position.x, mh * 0.85 - 2, m.position.z);
+            scene.add(cap);
+        }
+
+        // Дарахтон ва чароғҳои кӯча (instanced — зуд кор мекунад)
+        const roadLines = [-300, -150, 0, 150, 300];
+        const treePts = [], lampPts = [];
+        roadLines.forEach(r => {
+            for (let t = -460; t <= 460; t += 24) {
+                if (roadLines.some(q => Math.abs(t - q) < 20)) continue;
+                [-14, 14].forEach(off => treePts.push([r + off, t], [t, r + off]));
+            }
+            for (let t = -456; t <= 456; t += 48) {
+                if (roadLines.some(q => Math.abs(t - q) < 20)) continue;
+                lampPts.push([r + 10.5, t], [t, r - 10.5]);
+            }
+        });
+        for (let i = treePts.length - 1; i >= 0; i--) {
+            const tx = treePts[i][0], tz = treePts[i][1];
+            if ((Math.abs(tx - 75) < 14 || Math.abs(tx + 75) < 14) && (Math.abs(tz - 163) < 6 || Math.abs(tz - 287) < 6)) treePts.splice(i, 1);
+        }
+        const dummy = new THREE.Object3D();
+        const trunkMesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.35, 0.5, 4, 6), new THREE.MeshLambertMaterial({ color: 0x6b4423 }), treePts.length);
+        const crownMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(2.8, 8, 6), new THREE.MeshLambertMaterial({ color: 0x2f8a2f }), treePts.length);
+        treePts.forEach((p, i) => {
+            const k = 0.8 + Math.random() * 0.7;
+            dummy.scale.set(k, k, k);
+            dummy.position.set(p[0], 2 * k, p[1]); dummy.updateMatrix(); trunkMesh.setMatrixAt(i, dummy.matrix);
+            dummy.position.set(p[0], 5.2 * k, p[1]); dummy.updateMatrix(); crownMesh.setMatrixAt(i, dummy.matrix);
+        });
+        const poleMesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.15, 0.2, 9, 6), new THREE.MeshLambertMaterial({ color: 0x555a60 }), lampPts.length);
+        const lampMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.6, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfff2b0 }), lampPts.length);
+        dummy.scale.set(1, 1, 1);
+        lampPts.forEach((p, i) => {
+            dummy.position.set(p[0], 4.5, p[1]); dummy.updateMatrix(); poleMesh.setMatrixAt(i, dummy.matrix);
+            dummy.position.set(p[0], 9.2, p[1]); dummy.updateMatrix(); lampMesh.setMatrixAt(i, dummy.matrix);
+        });
+        [trunkMesh, crownMesh, poleMesh, lampMesh].forEach(m => { m.frustumCulled = false; scene.add(m); });
+
+        // --- 5. Сохтани Биноҳо ---
+        const windowMat = new THREE.MeshBasicMaterial({ color: 0xffea85 });
+        const winGeo = new THREE.PlaneGeometry(1.2, 1.8);
+        const colliders = [];
+        const mapItems = [];
+        function hitsBuilding(x, z, r = 0) {
+            return colliders.some(c => x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r);
+        }
+        const doorMat = new THREE.MeshLambertMaterial({ color: 0x4a2a00 });
+        const enterableBuildings = [];
+
+        function createBuilding(w, h, d, color, x, z, title1 = "", title2 = "", isClassroom = false) {
+            const group = new THREE.Group();
+
+            const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color }));
+            body.position.y = h / 2;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
+
+            const floors = Math.floor(h / 3.5);
+            const winList = [];
+            for (let f = 1; f < floors; f++) {
+                for (let wx = -w / 2 + 1.8; wx < w / 2 - 1.5; wx += 2.8) {
+                    winList.push([wx, f * 3.5, d / 2 + 0.05, 0], [-wx, f * 3.5, -d / 2 - 0.05, Math.PI]);
+                }
+                for (let wz = -d / 2 + 1.8; wz < d / 2 - 1.5; wz += 2.8) {
+                    winList.push([w / 2 + 0.05, f * 3.5, wz, Math.PI / 2], [-w / 2 - 0.05, f * 3.5, -wz, -Math.PI / 2]);
+                }
+            }
+            const wins = new THREE.InstancedMesh(winGeo, windowMat, winList.length);
+            const m4 = new THREE.Matrix4();
+            winList.forEach((p, i) => { m4.makeRotationY(p[3]); m4.setPosition(p[0], p[1], p[2]); wins.setMatrixAt(i, m4); });
+            wins.frustumCulled = false;
+            group.add(wins);
+
+            const door = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 4), doorMat);
+            door.position.set(0, 2, d / 2 + 0.08);
+            group.add(door);
+
+            if (title1) {
+                const bannerTex = createCustomTexture(title1, title2, '#002147', '#00ffcc');
+                const banner = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.85, 4.5), new THREE.MeshBasicMaterial({ map: bannerTex }));
+                banner.position.set(0, h - 3, d / 2 + 0.1);
+                group.add(banner);
+            }
+
+            const subTex = createCustomTexture("ПОДПИСАТЬСЯ НА", "Miiirzozodaa", '#ff0055', '#ffffff');
+            const subBanner = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.6, 3.2), new THREE.MeshBasicMaterial({ map: subTex }));
+            subBanner.position.set(0, Math.max(5, h - 8.5), d / 2 + 0.1);
+            group.add(subBanner);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+
+            colliders.push({ minX: x - w / 2 - 0.6, maxX: x + w / 2 + 0.6, minZ: z - d / 2 - 0.6, maxZ: z + d / 2 + 0.6 });
+            mapItems.push({ x, z, w, d, title1, title2, css: new THREE.Color(color).getStyle() });
+            enterableBuildings.push({
+                x: x,
+                z: z + d / 2 + 2,
+                name: title1 ? `${title1} ${title2}` : "Доми истиқоматӣ",
+                isClassroom: isClassroom,
+                landmark: !!title1 && !title1.startsWith("ДОМИ")
+            });
+
+            return group;
+        }
+
+        // --- 6. Ҷойҳои Асосии Шаҳр ---
+        function createTajikFlagTexture() {
+            const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+            const g = c.getContext('2d');
+            g.fillStyle = '#cc0000'; g.fillRect(0, 0, 512, 73);
+            g.fillStyle = '#ffffff'; g.fillRect(0, 73, 512, 110);
+            g.fillStyle = '#006600'; g.fillRect(0, 183, 512, 73);
+            g.fillStyle = '#f2b705';
+            g.beginPath(); g.moveTo(216, 150); g.lineTo(216, 118); g.lineTo(236, 134); g.lineTo(256, 106); g.lineTo(276, 134); g.lineTo(296, 118); g.lineTo(296, 150); g.closePath(); g.fill();
+            g.font = 'bold 20px Arial'; g.textAlign = 'center';
+            for (let i = 0; i < 7; i++) { const a = Math.PI + (i / 6) * Math.PI; g.fillText('★', 256 + Math.cos(a) * 62, 156 + Math.sin(a) * 48); }
+            return new THREE.CanvasTexture(c);
+        }
+        function createFlagpole(x, z) {
+            const group = new THREE.Group();
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.6, 65, 12), new THREE.MeshLambertMaterial({ color: 0xdddddd }));
+            pole.position.y = 32.5;
+            group.add(pole);
+
+            const flagTex = createTajikFlagTexture();
+            const flag = new THREE.Mesh(new THREE.PlaneGeometry(14, 7), new THREE.MeshBasicMaterial({ map: flagTex, side: THREE.DoubleSide }));
+            flag.position.set(7, 58, 0);
+            group.add(flag);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+        createFlagpole(0, 0);
+        const plaza = new THREE.Mesh(new THREE.CircleGeometry(15, 40), new THREE.MeshLambertMaterial({ color: 0xb8b2a3 }));
+        plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0.08; plaza.receiveShadow = true;
+        scene.add(plaza);
+
+        const cityLocations = [
+            { title1: "СУПЕРМАРКЕТ", title2: "АШАН ДУШАНБЕ", color: "#dd2222", x: 225, z: -75, w: 45, h: 18, d: 30, isClassroom: false },
+            { title1: "БОЗОРИ", title2: "МЕҲРГОН", color: "#cc8800", x: -75, z: 75, w: 50, h: 22, d: 35, isClassroom: false },
+            { title1: "БОЗОРИ", title2: "КОРВОН", color: "#885522", x: 75, z: 75, w: 55, h: 20, d: 40, isClassroom: false },
+            { title1: "ДОНИШГОҲИ МИЛЛӢ", title2: "ТНУ ДУШАНБЕ", color: "#0044aa", x: -75, z: -75, w: 45, h: 28, d: 30, isClassroom: false },
+            { title1: "ДОНИШГОҲИ ТИҶОРАТ", title2: "ДДТТ (Синфхонаи №29)", color: "#006688", x: 75, z: -75, w: 45, h: 26, d: 28, isClassroom: true },
+            { title1: "МАКТАБИ МИЁНАИ №1", title2: "ДУШАНБЕ", color: "#228855", x: -225, z: -75, w: 38, h: 20, d: 25, isClassroom: false },
+            { title1: "МАҶМААИ", title2: "ИСТИҚЛОЛ", color: "#4444aa", x: 225, z: 75, w: 25, h: 55, d: 25, isClassroom: false }
+        ];
+
+        function createBannerTexture(text, bg, fg, fontPx = 64) {
+            const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+            const g = c.getContext('2d');
+            g.fillStyle = bg; g.fillRect(0, 0, 512, 128);
+            g.strokeStyle = fg; g.lineWidth = 6; g.strokeRect(5, 5, 502, 118);
+            g.fillStyle = fg; g.font = `bold ${fontPx}px Arial`; g.textAlign = 'center'; g.textBaseline = 'middle';
+            g.fillText(text, 256, 68);
+            return new THREE.CanvasTexture(c);
+        }
+        function addFaceBanner(group, tex, bw, bh, px, py, pz, ry) {
+            const m = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
+            m.position.set(px, py, pz); m.rotation.y = ry;
+            group.add(m);
+        }
+
+        cityLocations.push(
+            { title1: "ТИҶОРАТГОҲИ БУЗУРГ", title2: "СИЁМА-МОЛЛ", color: "#8a8f98", x: -225, z: 75, w: 100, h: 38, d: 60, isClassroom: false,
+              extra: (g, l) => {
+                  const tex = createBannerTexture("WEB-market", "#ffd400", "#111111");
+                  [-28, 28].forEach(bx => addFaceBanner(g, tex, 30, 7.5, bx, 19, l.d / 2 + 0.2, 0));
+                  addFaceBanner(g, tex, 30, 7.5, 0, 19, -l.d / 2 - 0.2, Math.PI);
+                  addFaceBanner(g, tex, 30, 7.5, l.w / 2 + 0.2, 19, 0, Math.PI / 2);
+                  addFaceBanner(g, tex, 30, 7.5, -l.w / 2 - 0.2, 19, 0, -Math.PI / 2);
+              } },
+            { title1: "COMPORT", title2: "МАҒОЗАИ КАМЕРА", color: "#1f2a44", x: 225, z: 225, w: 34, h: 14, d: 24, isClassroom: false,
+              extra: (g, l) => {
+                  const cam = new THREE.Group();
+                  const dark = new THREE.MeshLambertMaterial({ color: 0x222222 });
+                  cam.add(new THREE.Mesh(new THREE.BoxGeometry(12, 7, 6), dark));
+                  const lens = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 3, 4, 20), new THREE.MeshLambertMaterial({ color: 0x111111 }));
+                  lens.rotation.x = Math.PI / 2; lens.position.set(0, 0, 5); cam.add(lens);
+                  const glass = new THREE.Mesh(new THREE.CircleGeometry(2.1, 20), new THREE.MeshBasicMaterial({ color: 0x3a6dff }));
+                  glass.position.set(0, 0, 7.05); cam.add(glass);
+                  const flash = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 1.5), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+                  flash.position.set(-3.5, 4.1, 0); cam.add(flash);
+                  cam.position.set(0, l.h + 3.5, 0);
+                  g.add(cam);
+              } }
+        );
+
+        // --- Муҷассамаи Исмоили Сомонӣ ---
+        const goldMat = new THREE.MeshLambertMaterial({ color: 0xf5c518, emissive: 0x6b4a00 });
+        const marbleMat = new THREE.MeshLambertMaterial({ color: 0xf2f0ea });
+        function createSomoniMonument(x, z) {
+            const g = new THREE.Group();
+            const lawn = new THREE.Mesh(new THREE.CircleGeometry(32, 40), new THREE.MeshLambertMaterial({ color: 0x3f9a3a }));
+            lawn.rotation.x = -Math.PI / 2; lawn.position.y = 0.06; lawn.receiveShadow = true; g.add(lawn);
+            [24, 20, 16].forEach((sz, i) => {
+                const step = new THREE.Mesh(new THREE.BoxGeometry(sz, 0.5, sz), marbleMat);
+                step.position.y = 0.25 + i * 0.5; step.receiveShadow = true; g.add(step);
+            });
+            const ped = new THREE.Mesh(new THREE.BoxGeometry(7, 7, 7), marbleMat);
+            ped.position.y = 5; ped.castShadow = true; g.add(ped);
+            const plate = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), new THREE.MeshBasicMaterial({ map: createBannerTexture("ИСМОИЛИ СОМОНӢ", "#1a1a1a", "#f5c518", 44) }));
+            plate.position.set(0, 5, 3.55); g.add(plate);
+            // Ҳайкал
+            const robe = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.9, 5.5, 12), goldMat); robe.position.y = 11.25; g.add(robe);
+            const chest = new THREE.Mesh(new THREE.SphereGeometry(1.25, 12, 10), goldMat); chest.scale.set(1.1, 0.8, 0.8); chest.position.y = 14.2; g.add(chest);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.75, 12, 10), goldMat); head.position.y = 15.5; g.add(head);
+            const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.7, 0.8, 10), goldMat); crown.position.y = 16.2; g.add(crown);
+            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.6, 0.5), goldMat); arm.position.set(1.7, 14.3, 0); arm.rotation.z = -0.5; g.add(arm);
+            const scepter = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 6, 8), goldMat); scepter.position.set(2.5, 14.2, 0.4); g.add(scepter);
+            // Сутунҳо ва тоҷи тиллоӣ
+            [[-6.5, -6.5], [6.5, -6.5], [-6.5, 6.5], [6.5, 6.5]].forEach(([cx, cz]) => {
+                const col = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.0, 22, 14), marbleMat);
+                col.position.set(cx, 12.5, cz); col.castShadow = true; g.add(col);
+            });
+            const ring = new THREE.Mesh(new THREE.CylinderGeometry(9.6, 9.6, 2.5, 32, 1, true), goldMat);
+            ring.material = goldMat.clone(); ring.material.side = THREE.DoubleSide; ring.position.y = 24.75; g.add(ring);
+            for (let i = 0; i < 10; i++) {
+                const a = (i / 10) * Math.PI * 2;
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.9, 3, 8), goldMat);
+                spike.position.set(Math.cos(a) * 9.6, 27.5, Math.sin(a) * 9.6); g.add(spike);
+            }
+            [0, Math.PI / 2].forEach(ry => {
+                const arch = new THREE.Mesh(new THREE.TorusGeometry(9.2, 0.35, 8, 24, Math.PI), goldMat);
+                arch.scale.set(1, 0.5, 1); arch.rotation.y = ry; arch.position.y = 25.5; g.add(arch);
+            });
+            const orb = new THREE.Mesh(new THREE.SphereGeometry(0.8, 12, 10), goldMat); orb.position.y = 30.7; g.add(orb);
+            g.position.set(x, 0, z);
+            scene.add(g);
+            colliders.push({ minX: x - 8.5, maxX: x + 8.5, minZ: z - 8.5, maxZ: z + 8.5 });
+        }
+        createSomoniMonument(75, 225);
+
+        // --- Парки Саховат ---
+        function createSakhovatPark(x, z) {
+            const g = new THREE.Group();
+            const lawn = new THREE.Mesh(new THREE.PlaneGeometry(126, 126), new THREE.MeshLambertMaterial({ color: 0x4caf50 }));
+            lawn.rotation.x = -Math.PI / 2; lawn.position.y = 0.06; lawn.receiveShadow = true; g.add(lawn);
+            const pathMat = new THREE.MeshLambertMaterial({ color: 0xd8cfb8 });
+            [[126, 5], [5, 126]].forEach(([pw, pd]) => {
+                const path = new THREE.Mesh(new THREE.PlaneGeometry(pw, pd), pathMat);
+                path.rotation.x = -Math.PI / 2; path.position.y = 0.08; g.add(path);
+            });
+            const plazaP = new THREE.Mesh(new THREE.CircleGeometry(16, 36), pathMat);
+            plazaP.rotation.x = -Math.PI / 2; plazaP.position.y = 0.09; g.add(plazaP);
+            // Фавора
+            const basin = new THREE.Mesh(new THREE.CylinderGeometry(8, 8.5, 1.2, 32), new THREE.MeshLambertMaterial({ color: 0xcfd8dc }));
+            basin.position.y = 0.6; g.add(basin);
+            const water = new THREE.Mesh(new THREE.CircleGeometry(7.3, 32), new THREE.MeshLambertMaterial({ color: 0x4fc3f7, emissive: 0x114466 }));
+            water.rotation.x = -Math.PI / 2; water.position.y = 1.22; g.add(water);
+            const jet = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.5, 5, 10), new THREE.MeshLambertMaterial({ color: 0xbfe9ff, emissive: 0x3a7fa0 }));
+            jet.position.y = 3.5; g.add(jet);
+            for (let i = 0; i < 8; i++) {
+                const a = (i / 8) * Math.PI * 2;
+                const drop = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 6), jet.material);
+                drop.position.set(Math.cos(a) * 3, 4.6, Math.sin(a) * 3); g.add(drop);
+            }
+            // Дарахтон
+            const trunkG = new THREE.CylinderGeometry(0.35, 0.5, 4, 6), crownG = new THREE.SphereGeometry(2.8, 8, 6);
+            const trunkM = new THREE.MeshLambertMaterial({ color: 0x6b4423 });
+            const crownMs = [0x2f8a2f, 0x3da03d, 0x237523].map(c => new THREE.MeshLambertMaterial({ color: c }));
+            for (let i = 0; i < 55; i++) {
+                const tx = (Math.random() - 0.5) * 116, tz = (Math.random() - 0.5) * 116;
+                if (Math.abs(tx) < 6 || Math.abs(tz) < 6 || Math.hypot(tx, tz) < 20 || (Math.abs(tx) < 18 && Math.abs(tz) > 40)) continue;
+                const k = 0.9 + Math.random() * 0.8;
+                const tr = new THREE.Mesh(trunkG, trunkM); tr.position.set(tx, 2 * k, tz); tr.scale.set(k, k, k); g.add(tr);
+                const cr = new THREE.Mesh(crownG, crownMs[i % 3]); cr.position.set(tx, 5.2 * k, tz); cr.scale.set(k, k, k); g.add(cr);
+            }
+            // Курсиҳо ва чароғҳо
+            const woodM = new THREE.MeshLambertMaterial({ color: 0x8d5a2b });
+            const poleM = new THREE.MeshLambertMaterial({ color: 0x555a60 });
+            const bulbM = new THREE.MeshBasicMaterial({ color: 0xfff2b0 });
+            function bench(bx, bz, ry) {
+                const b = new THREE.Group();
+                const seat = new THREE.Mesh(new THREE.BoxGeometry(3, 0.25, 0.9), woodM); seat.position.y = 0.6; b.add(seat);
+                const back = new THREE.Mesh(new THREE.BoxGeometry(3, 0.7, 0.15), woodM); back.position.set(0, 1.0, -0.4); b.add(back);
+                b.position.set(bx, 0, bz); b.rotation.y = ry; g.add(b);
+            }
+            [26, 44].forEach(d => [-1, 1].forEach(sg => {
+                bench(sg * d, 3.8, 0); bench(sg * d, -3.8, Math.PI);
+                bench(3.8, sg * d, -Math.PI / 2); bench(-3.8, sg * d, Math.PI / 2);
+                [[sg * d + 6, 3.5], [3.5, sg * d + 6]].forEach(([lx, lz]) => {
+                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 6, 6), poleM); pole.position.set(lx, 3, lz); g.add(pole);
+                    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 6), bulbM); bulb.position.set(lx, 6.2, lz); g.add(bulb);
+                });
+            }));
+            // Дарвозаи даромад бо ном
+            const signTex = createBannerTexture("ПАРКИ САХОВАТ", "#1b5e20", "#ffffff", 50);
+            [1, -1].forEach(sg => {
+                [-9.5, 9.5].forEach(px => {
+                    const post = new THREE.Mesh(new THREE.BoxGeometry(0.9, 11, 0.9), marbleMat); post.position.set(px, 5.5, sg * 62); g.add(post);
+                });
+                addFaceBanner(g, signTex, 18, 4.5, 0, 9.5, sg * 62, sg === 1 ? 0 : Math.PI);
+            });
+            g.position.set(x, 0, z);
+            scene.add(g);
+        }
+        createSakhovatPark(-75, 225);
+
+        cityLocations.forEach(loc => {
+            const lg = createBuilding(loc.w, loc.h, loc.d, loc.color, loc.x, loc.z, loc.title1, loc.title2, loc.isClassroom);
+            if (loc.extra) loc.extra(lg, loc);
+        });
+
+        // Блокҳои боқимонда бо домҳои истиқоматӣ пур мешаванд
+        const blockCenters = [-375, -225, -75, 75, 225, 375];
+        const landmarkBlocks = new Set([...cityLocations.map(l => `${l.x},${l.z}`), '75,225', '-75,225']);
+        const houseColors = [0x556677, 0x7a6a5a, 0x6a7a6a, 0x8a7a8a];
+        let houseNo = 1;
+        blockCenters.forEach(bx => blockCenters.forEach(bz => {
+            if (landmarkBlocks.has(`${bx},${bz}`)) return;
+            const ring = Math.abs(bx) > 300 || Math.abs(bz) > 300;
+            [-1, 1].forEach(side => {
+                const hh = ring ? 14 + Math.random() * 10 : 20 + Math.random() * 25;
+                createBuilding(18 + Math.random() * 6, hh, 18 + Math.random() * 6, houseColors[houseNo % 4],
+                    bx + side * 32, bz + (Math.random() - 0.5) * 20, "ДОМИ ИСТИҚОМАТӢ", `№ ${houseNo++}`, false);
+            });
+        }));
+
+        // --- 7. Даруни ДДТТ: Синфхонаи №29 (Lego-Студентҳо ва Одинабеков) ---
+        const classroomGroup = new THREE.Group();
+        classroomGroup.position.set(3000, 0, 3000); // Интерен бо шаҳр омехта намешавад
+
+        const roomWallMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, side: THREE.BackSide });
+        const roomFloorMat = new THREE.MeshStandardMaterial({ color: 0x7c4d32 });
+        const roomBoardMat = new THREE.MeshStandardMaterial({ color: 0x1e3a1e });
+        const roomDeskMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c });
+        const roomChairMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        const legoPantsMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const legoHeadMat = new THREE.MeshStandardMaterial({ color: 0xf1c40f });
+
+        // Синфхона
+        const roomBox = new THREE.Mesh(new THREE.BoxGeometry(12, 4, 16), roomWallMat);
+        roomBox.position.y = 2;
+        classroomGroup.add(roomBox);
+
+        const roomFloor = new THREE.Mesh(new THREE.PlaneGeometry(12, 16), roomFloorMat);
+        roomFloor.rotation.x = -Math.PI / 2;
+        classroomGroup.add(roomFloor);
+
+        const board = new THREE.Mesh(new THREE.BoxGeometry(5, 1.8, 0.05), roomBoardMat);
+        board.position.set(0, 2, -7.95);
+        classroomGroup.add(board);
+
+        // Текстураи костюм
+        function createSuitTexture(tieColorHex = '#c0392b') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, 128, 128);
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(64, 0); ctx.lineTo(38, 55); ctx.lineTo(90, 55); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = tieColorHex; ctx.beginPath(); ctx.moveTo(64, 10); ctx.lineTo(58, 28); ctx.lineTo(64, 90); ctx.lineTo(70, 28); ctx.closePath(); ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const suitTex = createSuitTexture('#e74c3c');
+        const suitBodyMaterials = [
+            new THREE.MeshStandardMaterial({ color: 0x111111 }),
+            new THREE.MeshStandardMaterial({ color: 0x111111 }),
+            new THREE.MeshStandardMaterial({ color: 0x111111 }),
+            new THREE.MeshStandardMaterial({ color: 0x111111 }),
+            new THREE.MeshStandardMaterial({ map: suitTex }),
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
+        ];
+
+        function createLegoStudent() {
+            const lego = new THREE.Group();
+
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.22), suitBodyMaterials);
+            torso.position.set(0, 0.58, 0);
+            lego.add(torso);
+
+            const headCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.22, 16), legoHeadMat);
+            headCyl.position.set(0, 0.88, 0);
+            lego.add(headCyl);
+
+            const stud = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.05, 12), legoHeadMat);
+            stud.position.set(0, 1.01, 0);
+            lego.add(stud);
+
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMat);
+            eyeL.position.set(-0.04, 0.90, -0.11);
+            lego.add(eyeL);
+
+            const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMat);
+            eyeR.position.set(0.04, 0.90, -0.11);
+            lego.add(eyeR);
+
+            const armMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+            const armL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.08), armMat);
+            armL.position.set(-0.21, 0.56, -0.05);
+            armL.rotation.x = -Math.PI / 4;
+            lego.add(armL);
+
+            const armR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.08), armMat);
+            armR.position.set(0.21, 0.56, -0.05);
+            armR.rotation.x = -Math.PI / 4;
+            lego.add(armR);
+
+            const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.28), legoPantsMat);
+            thigh.position.set(0, 0.38, -0.08);
+            lego.add(thigh);
+
+            const lowerLeg = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.12), legoPantsMat);
+            lowerLeg.position.set(0, 0.20, 0.02);
+            lego.add(lowerLeg);
+
+            return lego;
+        }
+
+        const studentsData = [
+            "Шаҳром", "Абубакр", "Муҳаммад", "Ҷамолиддин", "Мустафо",
+            "Комил", "Кароматулло", "Илёс", "Муҳаббатшоҳ", "Самандар",
+            "Хайём", "Раҳмоналӣ", "Фарзин", "Дамир", "Ҷавоҳир"
+        ];
+
+        const classroomStudents = [];
+        let sIdx = 0;
+
+        for (let r = 0; r < 5; r++) {
+            for (let c = 0; c < 3; c++) {
+                const x = (c - 1) * 3.2;
+                const z = -4 + (r * 2.3);
+
+                const desk = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.75, 0.8), roomDeskMat);
+                desk.position.set(x, 0.375, z);
+                classroomGroup.add(desk);
+
+                for (let side of [-0.4, 0.4]) {
+                    if (sIdx < studentsData.length) {
+                        const name = studentsData[sIdx];
+
+                        const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.05, 0.45), roomChairMat);
+                        chairSeat.position.set(x + side, 0.35, z + 0.55);
+                        classroomGroup.add(chairSeat);
+
+                        const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.4, 0.05), roomChairMat);
+                        chairBack.position.set(x + side, 0.55, z + 0.75);
+                        classroomGroup.add(chairBack);
+
+                        const legoStudent = createLegoStudent();
+                        legoStudent.position.set(x + side, 0.03, z + 0.55);
+                        classroomGroup.add(legoStudent);
+
+                        const nametagDiv = document.createElement('div');
+                        nametagDiv.className = 'nametag';
+                        nametagDiv.innerText = name;
+                        document.body.appendChild(nametagDiv);
+
+                        classroomStudents.push({ name, mesh: legoStudent, element: nametagDiv });
+                        sIdx++;
+                    }
+                }
+            }
+        }
+
+        // Муаллим Одинабеков
+        const teacherDesk = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 1), roomDeskMat);
+        teacherDesk.position.set(2.5, 0.4, -6.5);
+        classroomGroup.add(teacherDesk);
+
+        const teacherLego = createLegoStudent();
+        teacherLego.position.set(2.5, 0.03, -7.3);
+        classroomGroup.add(teacherLego);
+
+        const teacherTag = document.createElement('div');
+        teacherTag.className = 'nametag';
+        teacherTag.style.background = 'rgba(255, 140, 90, 0.95)';
+        teacherTag.innerText = 'Одинабеков (муаллим)';
+        document.body.appendChild(teacherTag);
+        classroomStudents.push({ name: 'Одинабеков', mesh: teacherLego, element: teacherTag });
+
+        scene.add(classroomGroup);
+
+        // Хонаи оддии пешина барои домҳои дигар
+        const interiorGroup = new THREE.Group();
+        interiorGroup.position.set(2000, 0, 2000);
+        const intRoom = new THREE.Mesh(new THREE.BoxGeometry(30, 10, 30), new THREE.MeshLambertMaterial({ color: 0xdddddd, side: THREE.BackSide }));
+        intRoom.position.y = 5;
+        interiorGroup.add(intRoom);
+
+        const intLight = new THREE.PointLight(0xffffff, 1.2, 40);
+        intLight.position.set(0, 8, 0);
+        interiorGroup.add(intLight);
+
+        const shelfMat = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
+        for (let sx = -8; sx <= 8; sx += 8) {
+            const shelf = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 12), shelfMat);
+            shelf.position.set(sx, 2, 0);
+            interiorGroup.add(shelf);
+        }
+        scene.add(interiorGroup);
+
+        let isInsideBuilding = false;
+        let isInsideClassroom = false;
+        let lastOutsidePos = new THREE.Vector3(12, 1.8, 12);
+
+        // --- 8. Трафики Мошинҳо ва Мошини Бозингар ---
+        const trafficCars = [];
+        const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16);
+        wheelGeo.rotateZ(Math.PI / 2);
+        const wheelMat = new THREE.MeshLambertMaterial({ color: 0x151515 });
+        function addWheels(car, hx, hz) {
+            [[-hx, hz], [hx, hz], [-hx, -hz], [hx, -hz]].forEach(([wx, wz]) => {
+                const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+                wheel.position.set(wx, 0.5, wz);
+                car.add(wheel);
+            });
+        }
+
+        function createTrafficCar(color) {
+            const car = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.0, 4.5), new THREE.MeshLambertMaterial({ color }));
+            body.position.y = 0.8;
+            car.add(body);
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.8, 2.2), new THREE.MeshLambertMaterial({ color: 0x111111 }));
+            cabin.position.set(0, 1.5, -0.2);
+            car.add(cabin);
+            addWheels(car, 1.25, 1.5);
+
+            const isHorizontal = Math.random() > 0.5;
+            const dir = Math.random() > 0.5 ? 1 : -1;
+            const road = (Math.floor(Math.random() * 5) - 2) * 150;
+            const along = (Math.random() - 0.5) * 900;
+            if (isHorizontal) { car.position.set(along, 0, road - dir * 4.5); car.rotation.y = dir * Math.PI / 2; }
+            else { car.position.set(road + dir * 4.5, 0, along); car.rotation.y = dir === 1 ? 0 : Math.PI; }
+            car.userData = { speed: 10 + Math.random() * 8, dir, isHorizontal };
+            scene.add(car);
+            trafficCars.push(car);
+        }
+
+        const carColors = [0xdd2222, 0x2288ff, 0xffaa00, 0x333333, 0xffffff];
+        for (let i = 0; i < 16; i++) createTrafficCar(carColors[i % carColors.length]);
+
+        function createBugatti() {
+            const car = new THREE.Group();
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0055ff, roughness: 0.2, metalness: 0.8 });
+            const blackMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+            const mainBody = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.7, 5.0), bodyMat);
+            mainBody.position.y = 0.6; car.add(mainBody);
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.6, 2.4), blackMat);
+            cabin.position.set(0, 1.1, -0.2); car.add(cabin);
+            const wing = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.1, 0.6), blackMat);
+            wing.position.set(0, 1.3, -2.3); car.add(wing);
+            const headMat = new THREE.MeshBasicMaterial({ color: 0xffffcc });
+            const tailMat = new THREE.MeshBasicMaterial({ color: 0xff2222 });
+            [-0.9, 0.9].forEach(lx => {
+                const hl = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.1), headMat);
+                hl.position.set(lx, 0.7, 2.52); car.add(hl);
+                const tl = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.1), tailMat);
+                tl.position.set(lx, 0.7, -2.52); car.add(tl);
+            });
+            addWheels(car, 1.3, 1.6);
+            return car;
+        }
+        const playerCar = createBugatti();
+        playerCar.position.set(2, 0, 40);
+        scene.add(playerCar);
+
+        let isInCar = false;
+        let camYaw = 0, camPitch = 0.3, lastCamMove = 0;
+        document.addEventListener('mousemove', (e) => {
+            if (!isInCar || !controls.isLocked) return;
+            camYaw -= e.movementX * 0.004;
+            camPitch = Math.max(0.02, Math.min(1.3, camPitch + e.movementY * 0.003));
+            lastCamMove = performance.now();
+        });
+        let carSpeed = 0;
+
+        // --- 9. Силоҳ ва NPCs ---
+        function createAK47() {
+            const ak = new THREE.Group();
+            const metalMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.6), metalMat);
+            ak.add(body);
+
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.5), metalMat);
+            barrel.rotation.x = Math.PI / 2;
+            barrel.position.set(0, 0.03, -0.45);
+            ak.add(barrel);
+
+            ak.scale.set(1.2, 1.2, 1.2);
+            return ak;
+        }
+
+        const playerAK = createAK47();
+        playerAK.position.set(0.25, -0.25, -0.4);
+        camera.add(playerAK);
+
+        let cityAggression = false;
+        const npcs = [];
+
+        function createNPC() {
+            const npc = new THREE.Group();
+            const headMat = new THREE.MeshLambertMaterial({ color: 0xffcc99 });
+            const shirtMat = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff });
+            const pantsMat = new THREE.MeshLambertMaterial({ color: 0x222244 });
+
+            const head = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.4, 12), headMat);
+            head.position.y = 1.5;
+            npc.add(head);
+
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.35), shirtMat);
+            body.position.y = 0.95;
+            npc.add(body);
+
+            const legL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.6, 0.28), pantsMat);
+            legL.position.set(-0.15, 0.3, 0);
+            npc.add(legL);
+
+            const legR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.6, 0.28), pantsMat);
+            legR.position.set(0.15, 0.3, 0);
+            npc.add(legR);
+
+            const ak = createAK47();
+            ak.position.set(0.3, 0.8, -0.2);
+            ak.visible = false;
+            npc.add(ak);
+
+            npc.userData = {
+                health: 30,
+                isHostile: false,
+                akRef: ak,
+                walkDir: new THREE.Vector3((Math.random() - 0.5), 0, (Math.random() - 0.5)).normalize(),
+                lastShoot: 0
+            };
+
+            let x, z;
+            do {
+                x = (Math.random() - 0.5) * (mapSize - 200);
+                z = (Math.random() - 0.5) * (mapSize - 200);
+            } while (hitsBuilding(x, z, 2));
+            npc.position.set(x, 0, z);
+
+            scene.add(npc);
+            npcs.push(npc);
+        }
+
+        for (let i = 0; i < 35; i++) createNPC();
+
+        // --- 10. Идоракунӣ ва Свитчи Муҳитҳо ---
+        const controls = new THREE.PointerLockControls(camera, document.body);
+        scene.add(controls.getObject());
+
+        const instructions = document.getElementById('instructions');
+        instructions.addEventListener('click', () => controls.lock());
+        controls.addEventListener('lock', () => instructions.style.display = 'none');
+        controls.addEventListener('unlock', () => { if (playerHealth > 0) instructions.style.display = 'block'; });
+
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, canJump = false;
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        let prevTime = performance.now();
+
+        document.addEventListener('keydown', (e) => {
+            switch (e.code) {
+                case 'KeyW': moveForward = true; break;
+                case 'KeyS': moveBackward = true; break;
+                case 'KeyA': moveLeft = true; break;
+                case 'KeyD': moveRight = true; break;
+                case 'Space': if (canJump && !isInCar) velocity.y += 18; canJump = false; break;
+                case 'KeyE': toggleCarMode(); break;
+                case 'KeyF': toggleHouseInterior(); break;
+                case 'KeyM': toggleBigMap(); break;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch (e.code) {
+                case 'KeyW': moveForward = false; break;
+                case 'KeyS': moveBackward = false; break;
+                case 'KeyA': moveLeft = false; break;
+                case 'KeyD': moveRight = false; break;
+            }
+        });
+
+        function toggleHouseInterior() {
+            const playerPos = controls.getObject().position;
+
+            if (!isInsideBuilding) {
+                let nearBuilding = enterableBuildings.find(b => playerPos.distanceTo(new THREE.Vector3(b.x, 1.8, b.z)) < 6);
+                if (nearBuilding) {
+                    lastOutsidePos.copy(playerPos);
+                    isInsideBuilding = true;
+
+                    if (nearBuilding.isClassroom) {
+                        isInsideClassroom = true;
+                        controls.getObject().position.set(3000, 1.7, 3006); // Воридшавӣ ба Синфхонаи №29
+                        document.getElementById('mode').innerText = "ДДТТ - Синфхонаи №29";
+                    } else {
+                        isInsideClassroom = false;
+                        controls.getObject().position.set(2000, 1.8, 2000);
+                        document.getElementById('mode').innerText = `Даруни: ${nearBuilding.name}`;
+                    }
+                    document.getElementById('mode').style.color = '#00ff00';
+                }
+            } else {
+                isInsideBuilding = false;
+                isInsideClassroom = false;
+                controls.getObject().position.copy(lastOutsidePos);
+                document.getElementById('mode').innerText = 'Пиёда дар Шаҳр';
+                document.getElementById('mode').style.color = '#ffaa00';
+                document.getElementById('dialog-box').style.display = 'none';
+                classroomStudents.forEach(s => s.element.style.display = 'none');
+            }
+        }
+
+        function toggleCarMode() {
+            if (isInsideBuilding) return;
+            const playerPos = controls.getObject().position;
+            const distToCar = playerPos.distanceTo(playerCar.position);
+
+            if (!isInCar) {
+                if (distToCar < 6) {
+                    isInCar = true;
+                    playerAK.visible = false;
+                    document.getElementById('crosshair').style.display = 'none';
+                    document.getElementById('mode').innerText = 'Дар мошин';
+                    document.getElementById('mode').style.color = '#00ffcc';
+                }
+            } else {
+                isInCar = false;
+                playerAK.visible = true;
+                document.getElementById('crosshair').style.display = 'block';
+                document.getElementById('mode').innerText = 'Пиёда дар Шаҳр';
+                document.getElementById('mode').style.color = '#ffaa00';
+                controls.getObject().position.set(playerCar.position.x + 3, 1.8, playerCar.position.z);
+            }
+        }
+
+        // --- 11. Ҳамла ва Бозӣ ---
+        let playerHealth = 100;
+        let score = 0;
+        const raycaster = new THREE.Raycaster();
+
+        document.addEventListener('mousedown', (e) => {
+            if (!controls.isLocked || e.button !== 0 || playerHealth <= 0 || isInCar || isInsideClassroom) return;
+
+            playerAK.position.z = -0.3;
+            setTimeout(() => playerAK.position.z = -0.4, 80);
+
+            cityAggression = true;
+            document.getElementById('wanted').innerText = 'АГРЕССИЯ / ҶАНГ';
+            document.getElementById('wanted').style.color = '#ff3333';
+
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            const npcMeshes = [];
+            npcs.forEach(n => n.children.forEach(c => npcMeshes.push(c)));
+
+            const intersects = raycaster.intersectObjects(npcMeshes);
+
+            if (intersects.length > 0) {
+                let hitMesh = intersects[0].object;
+                let npcGroup = hitMesh.parent;
+
+                while (npcGroup && !npcGroup.userData.health && npcGroup.parent !== scene) {
+                    npcGroup = npcGroup.parent;
+                }
+
+                if (npcGroup && npcGroup.userData && npcGroup.userData.health) {
+                    npcGroup.userData.health -= 20;
+                    npcGroup.userData.isHostile = true;
+                    npcGroup.userData.akRef.visible = true;
+
+                    if (npcGroup.userData.health <= 0) {
+                        scene.remove(npcGroup);
+                        const idx = npcs.indexOf(npcGroup);
+                        if (idx > -1) npcs.splice(idx, 1);
+                        score++;
+                        document.getElementById('score').innerText = score;
+                        setTimeout(() => createNPC(), 3000);
+                    }
+                }
+            }
+        });
+
+        function takeDamage(amount) {
+            playerHealth -= amount;
+            document.getElementById('health').innerText = Math.max(0, playerHealth);
+
+            const overlay = document.getElementById('damage-overlay');
+            overlay.style.opacity = '1';
+            setTimeout(() => overlay.style.opacity = '0', 150);
+
+            if (playerHealth <= 0) {
+                controls.unlock();
+                document.getElementById('game-over').style.display = 'block';
+            }
+        }
+
+        // --- 12. Минимап ---
+        const minimapCanvas = document.getElementById('minimap');
+        const ctx = minimapCanvas.getContext('2d');
+
+        function updateMinimap(playerX, playerZ) {
+            ctx.clearRect(0, 0, 160, 160);
+            ctx.fillStyle = 'rgba(20, 25, 35, 0.9)';
+            ctx.fillRect(0, 0, 160, 160);
+
+            if (isInsideBuilding) {
+                ctx.fillStyle = '#00ffcc';
+                ctx.font = '13px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(isInsideClassroom ? "СИНФХОНАИ №29" : "ДАРУНИ ХОНА", 80, 85);
+                return;
+            }
+
+            const scale = 160 / mapSize;
+            const centerX = 80;
+            const centerY = 80;
+
+            const mm = scale * 1.5;
+            ctx.strokeStyle = '#3a3f4b'; ctx.lineWidth = 4;
+            [-300, -150, 0, 150, 300].forEach(r => {
+                const ry = centerY + (r - playerZ) * mm, rx = centerX + (r - playerX) * mm;
+                ctx.beginPath(); ctx.moveTo(0, ry); ctx.lineTo(160, ry); ctx.moveTo(rx, 0); ctx.lineTo(rx, 160); ctx.stroke();
+            });
+            enterableBuildings.forEach(b => {
+                if (!b.landmark) return;
+                const bx = centerX + (b.x - playerX) * mm, bz = centerY + (b.z - playerZ) * mm;
+                if (bx > 4 && bx < 156 && bz > 4 && bz < 156) { ctx.fillStyle = '#2d6cdf'; ctx.fillRect(bx - 5, bz - 5, 10, 10); }
+            });
+
+            [{ x: 75, z: 225, c: '#f5c518' }, { x: -75, z: 225, c: '#2ecc71' }].forEach(poi => {
+                const px = centerX + (poi.x - playerX) * mm, pz = centerY + (poi.z - playerZ) * mm;
+                if (px > 4 && px < 156 && pz > 4 && pz < 156) { ctx.fillStyle = poi.c; ctx.beginPath(); ctx.arc(px, pz, 5, 0, Math.PI * 2); ctx.fill(); }
+            });
+
+            npcs.forEach(n => {
+                const mapX = centerX + (n.position.x - playerX) * scale * 1.5;
+                const mapZ = centerY + (n.position.z - playerZ) * scale * 1.5;
+                if (mapX >= 0 && mapX <= 160 && mapZ >= 0 && mapZ <= 160) {
+                    ctx.fillStyle = n.userData.isHostile ? '#ff0000' : '#ffff00';
+                    ctx.beginPath();
+                    ctx.arc(mapX, mapZ, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            ctx.fillStyle = '#00ff00';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // --- 12б. Харитаи калон (тугмаи M) ---
+        const bigMapEl = document.getElementById('bigmap');
+        const bigMapCanvas = document.getElementById('bigmap-canvas');
+        const bctx = bigMapCanvas.getContext('2d');
+        let bigMapOpen = false;
+        const _dirV = new THREE.Vector3();
+        const mapPOIs = [
+            { x: -75, z: 225, w: 126, d: 126, name: 'ПАРКИ САХОВАТ', css: '#3f9a4a' },
+            { x: 75, z: 225, w: 26, d: 26, name: 'МУҶАССАМАИ ИСМОИЛИ СОМОНӢ', css: '#f5c518' },
+            { x: 0, z: 0, w: 30, d: 30, name: 'МАЙДОНИ МАРКАЗӢ (БАЙРАҚ)', css: '#b8b2a3', round: true }
+        ];
+
+        function toggleBigMap() {
+            bigMapOpen = !bigMapOpen;
+            bigMapEl.style.display = bigMapOpen ? 'block' : 'none';
+            if (bigMapOpen) {
+                const sz = Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.9);
+                bigMapCanvas.width = sz; bigMapCanvas.height = sz;
+            }
+        }
+
+        function wrapLabel(text, max) {
+            const lines = []; let cur = '';
+            text.split(' ').forEach(w => {
+                if (cur && (cur + ' ' + w).length > max) { lines.push(cur); cur = w; }
+                else cur = cur ? cur + ' ' + w : w;
+            });
+            if (cur) lines.push(cur);
+            return lines;
+        }
+
+        function drawLabel(lines, x, y, fs, bg, fg) {
+            bctx.font = `bold ${fs}px Arial`;
+            bctx.textAlign = 'center'; bctx.textBaseline = 'middle';
+            const lh = fs + 2, bw = Math.max(...lines.map(l => bctx.measureText(l).width)) + 8, bh = lines.length * lh + 4;
+            bctx.fillStyle = bg; bctx.fillRect(x - bw / 2, y - bh / 2, bw, bh);
+            bctx.fillStyle = fg;
+            lines.forEach((l, i) => bctx.fillText(l, x, y - bh / 2 + 2 + lh * (i + 0.5)));
+        }
+
+        function drawBigMap() {
+            const W = bigMapCanvas.width, s = W / 1020, c = W / 2;
+            const X = v => c + v * s;
+            const fs = Math.max(10, Math.round(W / 62));
+            bctx.fillStyle = '#2f5d34'; bctx.fillRect(0, 0, W, W);
+
+            bctx.strokeStyle = '#4b505b'; bctx.lineWidth = Math.max(5, 18 * s);
+            [-300, -150, 0, 150, 300].forEach(r => {
+                bctx.beginPath();
+                bctx.moveTo(0, X(r)); bctx.lineTo(W, X(r));
+                bctx.moveTo(X(r), 0); bctx.lineTo(X(r), W);
+                bctx.stroke();
+            });
+
+            mapPOIs.forEach(p => {
+                bctx.fillStyle = p.css;
+                if (p.round) { bctx.beginPath(); bctx.arc(X(p.x), X(p.z), p.w / 2 * s, 0, Math.PI * 2); bctx.fill(); }
+                else bctx.fillRect(X(p.x - p.w / 2), X(p.z - p.d / 2), p.w * s, p.d * s);
+            });
+            mapItems.forEach(b => {
+                bctx.fillStyle = b.css;
+                bctx.fillRect(X(b.x - b.w / 2), X(b.z - b.d / 2), b.w * s, b.d * s);
+                bctx.strokeStyle = 'rgba(0,0,0,0.6)'; bctx.lineWidth = 1;
+                bctx.strokeRect(X(b.x - b.w / 2), X(b.z - b.d / 2), b.w * s, b.d * s);
+            });
+
+            // Номҳо: аввал рақами хонаҳо, баъд ҷойҳои асосӣ
+            mapItems.forEach(b => {
+                if (b.title1 && b.title1.startsWith('ДОМИ')) drawLabel([b.title2], X(b.x), X(b.z), Math.max(8, fs - 3), 'rgba(0,0,0,0.55)', '#dfe6ee');
+            });
+            mapItems.forEach(b => {
+                if (!b.title1 || b.title1.startsWith('ДОМИ')) return;
+                drawLabel(wrapLabel(b.title1 + ' ' + b.title2, 15), X(b.x), X(b.z), fs, 'rgba(0,0,0,0.78)', '#ffffff');
+            });
+            mapPOIs.forEach(p => {
+                const yy = p.round ? X(p.z) + p.w * s / 2 + fs + 4 : X(p.z);
+                drawLabel(wrapLabel(p.name, 16), X(p.x), yy, fs, 'rgba(0,0,0,0.78)', '#ffe27a');
+            });
+
+            // Мошин
+            if (!isInCar) {
+                bctx.fillStyle = '#00a2ff'; bctx.fillRect(X(playerCar.position.x) - 4, X(playerCar.position.z) - 6, 8, 12);
+                drawLabel(['Bugatti'], X(playerCar.position.x), X(playerCar.position.z) - 14, Math.max(9, fs - 2), 'rgba(0,0,0,0.7)', '#7fd0ff');
+            }
+
+            // Бозингар
+            let px, pz, hx = 0, hz = 1;
+            if (isInsideBuilding) { px = lastOutsidePos.x; pz = lastOutsidePos.z; }
+            else if (isInCar) { px = playerCar.position.x; pz = playerCar.position.z; hx = Math.sin(playerCar.rotation.y); hz = Math.cos(playerCar.rotation.y); }
+            else { px = camera.position.x; pz = camera.position.z; camera.getWorldDirection(_dirV); hx = _dirV.x; hz = _dirV.z; }
+            const hl = Math.hypot(hx, hz) || 1; hx /= hl; hz /= hl;
+            const sx = X(px), sz = X(pz), a = 12;
+            bctx.fillStyle = '#00ff66'; bctx.strokeStyle = '#ffffff'; bctx.lineWidth = 2;
+            bctx.beginPath();
+            bctx.moveTo(sx + hx * a, sz + hz * a);
+            bctx.lineTo(sx - hx * a * 0.6 - hz * a * 0.6, sz - hz * a * 0.6 + hx * a * 0.6);
+            bctx.lineTo(sx - hx * a * 0.6 + hz * a * 0.6, sz - hz * a * 0.6 - hx * a * 0.6);
+            bctx.closePath(); bctx.fill(); bctx.stroke();
+            drawLabel([isInsideBuilding ? 'Шумо (дар дохили бино)' : 'Шумо'], sx, sz - 22, fs, 'rgba(0,80,30,0.85)', '#ffffff');
+
+            drawLabel(['ХАРИТАИ ШАҲРИ ДУШАНБЕ  —  M: пӯшидан'], W / 2, fs + 8, fs + 2, 'rgba(0,0,0,0.75)', '#00ffcc');
+        }
+
+        // --- 13. Ҳалқаи Асосии Бозӣ ---
+        camera.position.set(6, 1.8, 36);
+        const tempV = new THREE.Vector3();
+        const dialogBox = document.getElementById('dialog-box');
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = performance.now();
+            const delta = (time - prevTime) / 1000;
+
+            if (controls.isLocked && playerHealth > 0) {
+                const playerPos = controls.getObject().position;
+                const promptEl = document.getElementById('action-prompt');
+
+                trafficCars.forEach(car => {
+                    if (car.userData.isHorizontal) {
+                        car.position.x += car.userData.speed * car.userData.dir * delta;
+                        if (Math.abs(car.position.x) > 480) car.position.x = -Math.sign(car.position.x) * 480;
+                    } else {
+                        car.position.z += car.userData.speed * car.userData.dir * delta;
+                        if (Math.abs(car.position.z) > 480) car.position.z = -Math.sign(car.position.z) * 480;
+                    }
+                });
+
+                if (!isInCar) {
+                    velocity.x -= velocity.x * 10.0 * delta;
+                    velocity.z -= velocity.z * 10.0 * delta;
+                    velocity.y -= 9.8 * 4.0 * delta;
+
+                    direction.z = Number(moveForward) - Number(moveBackward);
+                    direction.x = Number(moveRight) - Number(moveLeft);
+                    direction.normalize();
+
+                    if (moveForward || moveBackward) velocity.z -= direction.z * 50.0 * delta;
+                    if (moveLeft || moveRight) velocity.x -= direction.x * 50.0 * delta;
+
+                    controls.moveRight(-velocity.x * delta);
+                    controls.moveForward(-velocity.z * delta);
+
+                    if (!isInsideBuilding) {
+                        colliders.forEach(c => {
+                            if (playerPos.x > c.minX && playerPos.x < c.maxX && playerPos.z > c.minZ && playerPos.z < c.maxZ) {
+                                const dl = playerPos.x - c.minX, dr = c.maxX - playerPos.x, dt = playerPos.z - c.minZ, db = c.maxZ - playerPos.z;
+                                const mn = Math.min(dl, dr, dt, db);
+                                if (mn === dl) playerPos.x = c.minX; else if (mn === dr) playerPos.x = c.maxX;
+                                else if (mn === dt) playerPos.z = c.minZ; else playerPos.z = c.maxZ;
+                            }
+                        });
+                    }
+
+                    playerPos.y += (velocity.y * delta);
+
+                    if (playerPos.y < 1.7) {
+                        velocity.y = 0;
+                        playerPos.y = 1.7;
+                        canJump = true;
+                    }
+
+                    if (!isInsideBuilding) {
+                        let nearBuilding = enterableBuildings.find(b => playerPos.distanceTo(new THREE.Vector3(b.x, 1.8, b.z)) < 6);
+                        let distToCar = playerPos.distanceTo(playerCar.position);
+
+                        if (nearBuilding) {
+                            promptEl.style.display = 'block';
+                            promptEl.innerText = `Тугмаи 'F'-ро пахш кунед барои даромадан ба ${nearBuilding.name}`;
+                        } else if (distToCar < 6) {
+                            promptEl.style.display = 'block';
+                            promptEl.innerText = "Тугмаи 'E'-ро пахш кунед барои нишастан ба мошин";
+                        } else {
+                            promptEl.style.display = 'none';
+                        }
+                    } else {
+                        promptEl.style.display = 'block';
+                        promptEl.innerText = "Тугмаи 'F'-ро пахш кунед барои баромадан ба кӯча";
+                    }
+
+                    updateMinimap(playerPos.x, playerPos.z);
+
+                    // Маҷмӯи мантиқи Синфхонаи №29 (ДДТТ)
+                    if (isInsideClassroom) {
+                        const teacherWorldPos = new THREE.Vector3();
+                        teacherLego.getWorldPosition(teacherWorldPos);
+
+                        if (playerPos.distanceTo(teacherWorldPos) < 3.5) {
+                            dialogBox.innerText = 'Одинабеков: "Боз дер кардӣ! Галстукат канӣ? Ба ДДТТ хуш омадӣ!"';
+                            dialogBox.style.display = 'block';
+                        } else {
+                            dialogBox.style.display = 'none';
+                        }
+
+                        classroomStudents.forEach(st => {
+                            const stWorldPos = new THREE.Vector3();
+                            st.mesh.getWorldPosition(stWorldPos);
+
+                            if (playerPos.distanceTo(stWorldPos) < 9) {
+                                tempV.copy(stWorldPos);
+                                tempV.y += 1.1;
+                                tempV.project(camera);
+
+                                if (tempV.z < 1) {
+                                    const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                                    const y = (tempV.y * -0.5 + 0.5) * window.innerHeight;
+
+                                    st.element.style.transform = `translate(-50%, -100%) translate(${x}px,${y}px)`;
+                                    st.element.style.display = 'block';
+                                } else {
+                                    st.element.style.display = 'none';
+                                }
+                            } else {
+                                st.element.style.display = 'none';
+                            }
+                        });
+                    }
+
+                } else {
+                    promptEl.style.display = 'none';
+
+                    if (moveForward) carSpeed = Math.min(carSpeed + 20 * delta, 32);
+                    else if (moveBackward) carSpeed = Math.max(carSpeed - 15 * delta, -12);
+                    else carSpeed *= 0.95;
+
+                    if (moveLeft) playerCar.rotation.y += 1.8 * delta;
+                    if (moveRight) playerCar.rotation.y -= 1.8 * delta;
+
+                    const prevCarPos = playerCar.position.clone();
+                    playerCar.translateZ(carSpeed * delta);
+                    if (hitsBuilding(playerCar.position.x, playerCar.position.z, 2.5)) { playerCar.position.copy(prevCarPos); carSpeed *= -0.3; }
+
+                    if (time - lastCamMove > 2500) { camYaw *= 0.96; camPitch += (0.3 - camPitch) * 0.04; }
+                    const cp = Math.cos(camPitch), th = playerCar.rotation.y + camYaw;
+                    camera.position.set(playerCar.position.x - Math.sin(th) * cp * 10.5, playerCar.position.y + 1.2 + Math.sin(camPitch) * 10.5, playerCar.position.z - Math.cos(th) * cp * 10.5);
+                    camera.lookAt(playerCar.position.x, playerCar.position.y + 1.2, playerCar.position.z);
+
+                    updateMinimap(playerCar.position.x, playerCar.position.z);
+                }
+
+                if (!isInsideBuilding) {
+                    npcs.forEach(npc => {
+                        if (cityAggression) {
+                            npc.userData.isHostile = true;
+                            npc.userData.akRef.visible = true;
+                        }
+
+                        const dist = npc.position.distanceTo(playerPos);
+
+                        if (npc.userData.isHostile) {
+                            if (dist > 5 && dist < 70) {
+                                npc.lookAt(playerPos.x, npc.position.y, playerPos.z);
+                                npc.translateZ(3.2 * delta);
+                            }
+
+                            if (dist < 40) {
+                                npc.lookAt(playerPos.x, npc.position.y, playerPos.z);
+                                if (time - npc.userData.lastShoot > 2000) {
+                                    npc.userData.lastShoot = time;
+                                    takeDamage(5);
+                                }
+                            }
+                        } else {
+                            npc.translateOnAxis(npc.userData.walkDir, 1.5 * delta);
+                            if (Math.random() < 0.005) {
+                                npc.userData.walkDir.set((Math.random() - 0.5), 0, (Math.random() - 0.5)).normalize();
+                            }
+                        }
+                    });
+                }
+            }
+
+            if (bigMapOpen) drawBigMap();
+            const dt = Math.min(delta, 0.1);
+            clouds.forEach(c => { c.position.x += c.userData.speed * dt; if (c.position.x > 1000) c.position.x = -1000; });
+            skyDome.position.copy(camera.position);
+            sunGroup.position.copy(camera.position).addScaledVector(SUN_DIR, 900);
+            sunLight.position.copy(camera.position).addScaledVector(SUN_DIR, 500);
+            sunLight.target.position.copy(camera.position);
+
+            prevTime = time;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
