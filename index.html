@@ -210,7 +210,8 @@
         <p style="font-size: 16px; color: #ccc;">
             <b>WASD</b> — Ҳаракат / Рондан | <b>SPACE</b> — Паридан<br>
             <b>E</b> — Нишастан / Баромадан аз Bugatti | <b>F</b> — Даромадан ба ДДТТ (Синфхонаи №29) / Дом / Бозор<br>
-            <b>Муш</b> — Камера (дар мошин ҳам давр мезанад) / Тирпарронӣ | <b>M</b> — Харитаи калон
+            <b>Муш</b> — Камера (дар мошин ҳам давр мезанад) / Тирпарронӣ | <b>M</b> — Харитаи калон<br>
+            <b>V</b> — Камераи 360° | <b>P</b> — Режими милиса
         </p>
     </div>
 
@@ -1525,6 +1526,158 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+    </script>
+
+    <script>
+function zerr(e){if(window.__zE)return;window.__zE=1;console.error(e);const d=document.createElement('div');d.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#b00;color:#fff;padding:8px 12px;z-index:99;font:14px monospace';d.textContent='plus.js хато: '+(e&&e.message);document.body.appendChild(d)}
+try{
+(()=>{
+const ZA=[],ZL=[];let ZT=2,ZS=0,ZP=0,zpb=null,ZG=-1;
+const ZM=(c,o)=>new THREE.MeshLambertMaterial(Object.assign({color:c},o||{})),B3=(a,b,c)=>new THREE.BoxGeometry(a,b,c),cy=(a,b,c,n,o)=>new THREE.CylinderGeometry(a,b,c,n||16,1,!!o);
+const ZB=(g,ge,m,x,y,z)=>{const o=new THREE.Mesh(ge,m);o.position.set(x,y,z);o.castShadow=true;g.add(o);return o};
+const WH=ZM(0xffffff),GOLD=ZM(0xf5c518,{emissive:0x6b4a00}),DBL=THREE.DoubleSide;
+const tex=(a,b,c1,c2)=>createCustomTexture(a,b,c1,c2),ban=(t,w,h)=>new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,side:DBL}));
+// --- тоза кардани хонаҳои оддӣ дар блокҳои ишғолшуда
+const BL=[[-375,-75,40,24,30,0xf4f4f4,'БЕМОРХОНАИ','ШАҲРӢ','hosp'],[375,-75,34,22,26,0x3a3a3a,'ВКД','КУМИТАИ ДАВЛАТӢ','flag'],[375,75,34,22,26,0x2a4a8a,'МВД','ВАЗОРАТИ КОРҲОИ ДОХИЛӢ','flag'],[-375,75,34,22,26,0xd8d0c0,'ПРОКУРАТУРА','ПРОКУРАТУРАИ КОЛ','flag'],[-375,225,28,45,24,0x7a86c8,'МЕҲМОНХОНА','ДУШАНБЕ ПЛАЗА',''],[375,225,30,10,22,0xb0453a,'ТАРАБХОНА','РЕСТОРАН ПАМИР',''],[-225,225,24,7,18,0x66c8e8,'МОЙКАИ','МОШИНҲО',''],[-75,-375,44,12,34,0x777770,'ЗИНДОН','МАҲБАСИ №1','prison'],[-75,375,12,5,10,0xf2a33a,'ХОТ-ДОГ','ФАСТ-ФУД','dog'],[75,375,18,7,16,0x3aa66a,'КАФЕ','ШАҲРИ ШИРИН',''],[-375,-225,30,6,26,0x9a9a9a,'БИНОКОРӢ','КУРУЛУШ','site']];
+const NB=BL.map(b=>[b[0],b[1]]).concat([[-225,-225],[225,-225],[-75,-225],[75,-225],[375,-225],[225,-375],[375,-375],[-225,375],[-375,375],[-375,-375],[-225,-375]]);
+NB.forEach(([bx,bz])=>{
+ scene.children.filter(o=>o.isGroup&&!o.userData.health&&!trafficCars.includes(o)&&Math.abs(o.position.x-bx)<70&&Math.abs(o.position.z-bz)<70).forEach(o=>scene.remove(o));
+ [colliders,mapItems,enterableBuildings].forEach(a=>{for(let i=a.length-1;i>=0;i--)if(Math.abs(a[i].x-bx)<70&&Math.abs((a[i].z)-bz)<75||(a[i].minX!==undefined&&Math.abs((a[i].minX+a[i].maxX)/2-bx)<70&&Math.abs((a[i].minZ+a[i].maxZ)/2-bz)<70))a.splice(i,1)})});
+// --- Lego-одамон
+function lego(col){const g=new THREE.Group(),Y=0xffd02a,a=(ge,c,x,y,z)=>ZB(g,ge,ZM(c),x,y,z);
+ a(B3(.42,.9,.5),0x1f3a8a,-.23,.45,0);a(B3(.42,.9,.5),0x1f3a8a,.23,.45,0);a(B3(1,1.05,.6),col,0,1.42,0);a(B3(.3,.95,.34),col,-.66,1.38,0);a(B3(.3,.95,.34),col,.66,1.38,0);
+ a(cy(.18,.18,.3,8),Y,-.66,.78,0);a(cy(.18,.18,.3,8),Y,.66,.78,0);a(cy(.42,.42,.6,12),Y,0,2.25,0);a(cy(.16,.16,.16,8),Y,0,2.64,0);g.scale.setScalar(1.15);return g}
+function deco(n){if(n.userData.zd)return;n.userData.zd=1;const ey=new THREE.MeshBasicMaterial({color:0x111111});
+ [-.09,.09].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.035,6,6),ey);e.position.set(x,1.55,.24);n.add(e)});
+ [-.4,.4].forEach(x=>ZB(n,B3(.18,.6,.2),n.children[1].material,x,.95,0));ZB(n,cy(.1,.1,.12,8),ZM(0xffd02a),0,1.76,0);n.children[0].material=ZM(0xffd02a)}
+npcs.forEach(deco);const oc=window.createNPC;window.createNPC=function(){oc();deco(npcs[npcs.length-1])};
+// --- ёрдамчиҳо
+function flag(g,x,z){ZB(g,cy(.15,.2,16,6),ZM(0xdddddd),x,8,z);const f=ban(new THREE.CanvasTexture(createTajikFlagTexture().image),6,3);f.position.set(x+3,14.5,z);g.add(f)}
+function crane(g,x,z){const y=ZM(0xf2b705),pv=new THREE.Group();ZB(g,B3(1.4,40,1.4),y,x,20,z);pv.position.set(x,41,z);g.add(pv);ZB(pv,B3(1,1.2,34),y,0,0,8);ZB(pv,B3(3,2,4),ZM(0x888888),0,-.5,-8);ZB(pv,B3(.2,6,.2),ZM(0x222222),0,-3,14);ZB(pv,B3(2,1.5,2),ZM(0xdd3333),0,-6.2,14);ZA.push(d=>pv.rotation.y+=d*.25)}
+function heli(c){const g=new THREE.Group(),m=ZM(c);ZB(g,new THREE.SphereGeometry(1.6,10,8),m,0,0,0).scale.set(1,.9,1.6);ZB(g,B3(.4,.4,5),m,0,.3,-4);ZB(g,B3(.2,1.6,.5),m,0,.9,-6.2);const r=new THREE.Group();r.position.y=1.8;g.add(r);ZB(r,B3(11,.1,.5),ZM(0x222222),0,0,0);ZB(r,B3(.5,.1,11),ZM(0x222222),0,0,0);ZA.push(d=>r.rotation.y+=d*25);return g}
+function plane(c){const g=new THREE.Group(),m=ZM(c);ZB(g,cy(1.5,1.2,16,10),m,0,2,0).rotation.x=Math.PI/2;ZB(g,new THREE.ConeGeometry(1.5,3,10),m,0,2,9.5).rotation.x=Math.PI/2;ZB(g,B3(24,.4,4),ZM(0x3a6ab0),0,1.8,0);ZB(g,B3(.4,4,3),ZM(0xd62828),0,4,-7);ZB(g,B3(8,.3,2),ZM(0x3a6ab0),0,2.2,-7.5);return g}
+function ship(){const g=new THREE.Group();ZB(g,B3(26,5,8),ZM(0x22304a),0,1.5,0);ZB(g,B3(9,6,7),WH,-7,7,0);ZB(g,cy(1.2,1.4,5,8),ZM(0xd62828),-7,12,0);for(let i=0;i<3;i++)ZB(g,B3(4,3,5),ZM([0xd04a3a,0x3a8ad0,0xe0a030][i]),3+i*4.6,5.5,0);return g}
+function reg(x,z,w,d,t1,t2,c,nc){if(!nc)colliders.push({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});mapItems.push({x,z,w,d,title1:t1,title2:t2,css:new THREE.Color(c).getStyle()});enterableBuildings.push({x,z:z+d/2+2,name:t1+' '+t2,isClassroom:false,landmark:true})}
+// --- биноҳои шаҳрӣ
+BL.forEach(([x,z,w,h,d,c,t1,t2,k])=>{const g=createBuilding(w,h,d,c,x,z,t1,t2,false);
+ if(k==='hosp'){[[8,2.4],[2.4,8]].forEach(s=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(s[0],s[1]),new THREE.MeshBasicMaterial({color:0xd62828}));p.position.set(0,h*.55,d/2+.3);g.add(p)});const hp=heli(0xffffff);hp.position.y=h+1.5;g.add(hp)}
+ if(k==='flag')flag(g,w/2-2,d/2+3);
+ if(k==='prison')[-1,1].forEach(a=>[-1,1].forEach(b=>{ZB(g,cy(2,2.2,20,8),ZM(0x66665f),a*(w/2+4),10,b*(d/2+4));ZB(g,B3(5,3,5),ZM(0x333333),a*(w/2+4),21,b*(d/2+4))}));
+ if(k==='dog'){ZB(g,cy(1.4,1.4,8,10),ZM(0xd9532b),0,h+3,0).rotation.z=Math.PI/2;ZB(g,cy(2,2,6,10),ZM(0xf0c070),0,h+3,0).rotation.z=Math.PI/2}
+ if(k==='site'){crane(g,-w/2+3,-d/2+3);crane(g,w/2-3,d/2-3);for(let i=0;i<4;i++){const p=lego(0xff8a00);p.position.set(-8+i*5,0,d/2+5);g.add(p)}}
+ else for(let i=0;i<3;i++){const p=lego(Math.random()*0xffffff);p.position.set(-6+i*6,0,d/2+4+Math.random()*3);p.rotation.y=Math.random()*6;g.add(p)}});
+cityLocations.forEach(l=>{for(let i=0;i<3;i++){const p=lego(Math.random()*0xffffff);p.position.set(l.x-6+i*6,0,l.z+l.d/2+4+Math.random()*3);p.rotation.y=Math.random()*6;scene.add(p)}});
+{const g=new THREE.Group();g.position.set(375,0,-225);ZB(g,B3(28,12,28),ZM(0xf1e3c4),0,6,0);ZB(g,new THREE.SphereGeometry(10,20,12,0,6.3,0,1.58),ZM(0x1ab5a0),0,12,0);
+ [-16,16].forEach(a=>[-16,16].forEach(b=>{ZB(g,cy(1,1,34,10),WH,a,17,b);ZB(g,new THREE.ConeGeometry(1.5,4,8),GOLD,a,36,b)}));const b=ban(tex('МАСҶИД','МАСҶИДИ ҶОМЕЪ','#0b4d3a','#f5c518'),20,5);b.position.set(0,8,14.2);g.add(b);scene.add(g);reg(375,-225,28,28,'МАСҶИД','МАСҶИДИ ҶОМЕЪ',0xf1e3c4)}
+// --- TAS International (120 қабат)
+{const g=new THREE.Group(),c=document.createElement('canvas');c.width=64;c.height=128;const q=c.getContext('2d');q.fillStyle='#1d4f78';q.fillRect(0,0,64,128);q.fillStyle='#9fd4f5';for(let i=0;i<8;i++)for(let j=0;j<16;j++)if((i*7+j*13)%5)q.fillRect(i*8+1,j*8+1,6,6);
+ const tx=new THREE.CanvasTexture(c);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;g.position.set(225,0,-225);
+ ZB(g,B3(40,12,40),ZM(0x8a9099),0,6,0);
+ [[0,150,15,13],[150,260,12,9.5],[260,340,9,7],[340,395,6,4.2],[395,430,3.5,2.2]].forEach(s=>{const t=tx.clone();t.needsUpdate=true;t.repeat.set(4,(s[1]-s[0])/12);ZB(g,cy(s[3],s[2],s[1]-s[0],6),new THREE.MeshPhongMaterial({map:t,shininess:120,specular:0x99ccee}),0,(s[0]+s[1])/2,0)});
+ ZB(g,new THREE.ConeGeometry(1.2,60,8),GOLD,0,460,0);const bl=ZB(g,new THREE.SphereGeometry(1.4,8,6),new THREE.MeshBasicMaterial({color:0xff2020}),0,492,0);ZA.push((d,t)=>bl.visible=Math.sin(t*4)>0);
+ const b=ban(tex('TAS International','120 ЭТАЖ · БУРҶИ ДУШАНБЕ','#0b2540','#f5c518'),32,8);b.position.set(0,9,20.3);g.add(b);scene.add(g);reg(225,-225,40,40,'TAS INTERNATIONAL','120 ЭТАЖ',0x1d4f78)}
+// --- Стадион (мисли Etihad)
+{const X=-225,Z=-225,g=new THREE.Group(),m=(c,o)=>ZM(c,Object.assign({side:DBL},o||{}));g.position.set(X,0,Z);
+ ZB(g,cy(42,42,22,48,1),m(0xcfd6dc),0,11,0);ZB(g,cy(42.4,42.4,3,48,1),m(0x7fc4f0),0,8,0);ZB(g,cy(40,27,14,48,1),m(0x2a7fd0),0,7,0);
+ const rf=ZB(g,new THREE.RingGeometry(27,44,48),m(0xdfe6ea),0,22,0);rf.rotation.x=-Math.PI/2;
+ const pc=document.createElement('canvas');pc.width=200;pc.height=290;const p=pc.getContext('2d');for(let i=0;i<8;i++){p.fillStyle=i%2?'#2e8b3a':'#37a044';p.fillRect(0,i*36,200,37)}p.strokeStyle='#fff';p.lineWidth=3;p.strokeRect(8,8,184,274);p.beginPath();p.moveTo(8,145);p.lineTo(192,145);p.stroke();p.beginPath();p.arc(100,145,28,0,7);p.stroke();
+ const pt=ZB(g,new THREE.PlaneGeometry(40,58),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(pc)}),0,.2,0);pt.rotation.x=-Math.PI/2;
+ [-1,1].forEach(s=>{[-3,3].forEach(x=>ZB(g,B3(.3,2.4,.3),WH,x,1.2,s*29));ZB(g,B3(6.3,.3,.3),WH,0,2.4,s*29)});
+ const gl=ZB(g,B3(26,14,3),new THREE.MeshPhongMaterial({color:0x2a8f8a,shininess:150,specular:0x99ffee}),0,7,45);const b=ban(tex('ТАС АРЕНА','СТАДИОНИ ДУШАНБЕ','#0a3a5a','#7fe0ff'),24,6);b.position.set(0,10,46.7);g.add(b);
+ const lm=new THREE.LineBasicMaterial({color:0xb8c0c8});
+ [45,135,225,315].forEach(dg=>{const a=dg*Math.PI/180,mx=Math.cos(a)*52,mz=Math.sin(a)*52;ZB(g,cy(.6,.9,78,8),ZM(0xd0d4d8),mx,39,mz);
+  for(let k=0;k<6;k++)ZB(g,cy(8.5-k*.4,8.5-k*.4,1.8,24),ZM(k%2?0xcdbba0:0x9fd0ee),mx,k*3.2+1,mz);
+  for(let k=-3;k<=3;k++){const b2=a+k*.14;g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(mx,75,mz),new THREE.Vector3(Math.cos(b2)*41,22,Math.sin(b2)*41)]),lm))}});
+ scene.add(g);for(const [cx,cz,w,d] of [[0,-43.5,90,3],[0,43.5,90,3],[-43.5,0,3,90],[43.5,0,3,90]])colliders.push({minX:X+cx-w/2,maxX:X+cx+w/2,minZ:Z+cz-d/2,maxZ:Z+cz+d/2});reg(X,Z,86,86,'ТАС АРЕНА','СТАДИОНИ ДУШАНБЕ',0x2a7fd0,1)}
+// --- Пойтахт (Оинаи давлатдорӣ)
+{const g=new THREE.Group(),bl=ZM(0x6fb4e0);g.position.set(-75,0,-225);ZB(g,B3(22,5,22),ZM(0xe8dfc8),0,2.5,0);ZB(g,cy(3.2,4.5,60,8),bl,0,35,0);ZB(g,cy(8,5,5,12),GOLD,0,54,0);ZB(g,cy(2,3.2,24,8),bl,0,70,0);ZB(g,cy(5,2,3,12),GOLD,0,84,0);ZB(g,new THREE.ConeGeometry(1.6,12,8),GOLD,0,92,0);ZB(g,new THREE.SphereGeometry(1.4,10,8),GOLD,0,99,0);
+ const b=ban(tex('ПОЙТАХТ','ОИНАИ ДАВЛАТДОРӣ','#103a5a','#f5c518'),16,4);b.position.set(0,7,11.3);g.add(b);scene.add(g);reg(-75,-225,16,16,'ПОЙТАХТ','ОИНАИ ДАВЛАТДОРӣ',0x6fb4e0)}
+// --- Дарвозаи Истиқлол (аз сурат: се камар, сутунҳо, тоҷи тиллоӣ, манора дар дарун)
+{const g=new THREE.Group();g.position.set(75,0,-225);const st=ZM(0xb8884a);
+ const pl=ZB(g,new THREE.PlaneGeometry(120,120),ZM(0xe6d6b8),0,.07,0);pl.rotation.x=-Math.PI/2;
+ [[-30,-30],[30,-30],[-30,30],[30,30]].forEach(f=>{const q=ZB(g,new THREE.PlaneGeometry(22,22),new THREE.MeshBasicMaterial({color:0xd8284a}),f[0],.09,f[1]);q.rotation.x=-Math.PI/2});
+ [[-27,7],[-10,6],[10,6],[27,7]].forEach(p=>{ZB(g,B3(p[1],34,10),st,p[0],17,0);ZB(g,B3(p[1]+1,2,11),GOLD,p[0],35,0)});
+ ZB(g,B3(62,8,10),st,0,39,0);ZB(g,B3(64,1.5,11),GOLD,0,43.5,0);
+ [[0,7.4],[-18.5,5.2],[18.5,5.2]].forEach(a=>ZB(g,new THREE.TorusGeometry(a[1],1.1,10,28,Math.PI),GOLD,a[0],26,0));
+ ZB(g,B3(12,6,7),GOLD,0,47,0);ZB(g,new THREE.ConeGeometry(4,7,8),GOLD,0,53.5,0);
+ ZB(g,cy(1,2.2,24,8),GOLD,0,12,-26);ZB(g,new THREE.SphereGeometry(2,10,8),GOLD,0,25,-26);
+ const b=ban(tex('','МАЙДОНИ ИСТИҚЛОЛ','#5a1a0a','#f5c518'),30,5);b.position.set(0,39,5.3);g.add(b);scene.add(g);
+ [-27,-10,10,27].forEach(x=>colliders.push({minX:75+x-3.5,maxX:75+x+3.5,minZ:-231,maxZ:-219}));reg(75,-225,64,14,'МАЙДОНИ ИСТИҚЛОЛ','ДАРВОЗАИ ИСТИҚЛОЛ',0xb8884a,1)}
+{const c=document.createElement('canvas');c.width=1024;c.height=256;const q=c.getContext('2d');q.fillStyle='#fff';q.fillRect(0,0,1024,256);q.fillStyle='#d8284a';q.font='bold 150px Arial';q.textAlign='center';q.fillText('I ♥ DUSHANBE',512,185);q.strokeStyle='#1f7a3a';q.lineWidth=10;q.strokeRect(5,5,1014,246);
+ const g=new THREE.Group(),s=ban(new THREE.CanvasTexture(c),36,9);s.position.y=7.5;g.add(s);[-17,17].forEach(x=>ZB(g,cy(.4,.4,8,6),ZM(0x555555),x,4,0));g.position.set(75,0,-168);scene.add(g)}
+// --- Муҷассамаи Исмоили Сомонӣ (аз сурат: камари баланди тиллоӣ бо тоҷ, гулзорҳои сурх)
+{const X=75,Z=225;scene.children.filter(o=>o.isGroup&&!o.userData.health&&Math.abs(o.position.x-X)<1&&Math.abs(o.position.z-Z)<1).forEach(o=>scene.remove(o));
+ for(let i=colliders.length-1;i>=0;i--){const c=colliders[i];if(c.minX>X-12&&c.maxX<X+12&&c.minZ>Z-12&&c.maxZ<Z+12)colliders.splice(i,1)}
+ const g=new THREE.Group(),mb=ZM(0xf2f0ea);g.position.set(X,0,Z);
+ const lw=ZB(g,new THREE.CircleGeometry(34,40),ZM(0x3f9a3a),0,.06,0);lw.rotation.x=-Math.PI/2;
+ [[-22,-22],[22,-22],[-22,22],[22,22],[0,-26],[0,26],[-26,0],[26,0]].forEach(f=>{const q=ZB(g,new THREE.PlaneGeometry(12,12),new THREE.MeshBasicMaterial({color:0xd8284a}),f[0],.09,f[1]);q.rotation.x=-Math.PI/2});
+ [22,18,14].forEach((s,i)=>ZB(g,B3(s,.7,s),mb,0,.35+i*.7,0));
+ const pts=[];for(let i=0;i<=40;i++){const t=i/40*Math.PI;pts.push(new THREE.Vector3(Math.cos(t)*8.5,Math.sin(t)*22+2.1,0))}
+ ZB(g,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),60,1.4,8,false),GOLD,0,0,0);
+ ZB(g,cy(1.6,1.9,2.4,10),GOLD,0,26.5,0);ZB(g,new THREE.ConeGeometry(1.7,3,10),GOLD,0,29,0);ZB(g,new THREE.SphereGeometry(.6,8,6),GOLD,0,31,0);
+ ZB(g,B3(5,3,5),mb,0,3.6,0);ZB(g,cy(1,1.6,5,10),GOLD,0,7.5,0);ZB(g,new THREE.SphereGeometry(.9,10,8),GOLD,0,10.5,0);ZB(g,cy(.9,.7,.7,10),GOLD,0,11.5,0);
+ const pn=ban(createBannerTexture?createBannerTexture('ИСМОИЛИ СОМОНӢ','#1a1a1a','#f5c518',44):tex('ИСМОИЛИ СОМОНӢ',''),5,1.2);pn.position.set(0,3.6,2.6);g.add(pn);
+ scene.add(g);colliders.push({minX:X-11,maxX:X+11,minZ:Z-11,maxZ:Z+11})}
+// --- светофорҳо, пиёдагузарҳо, баннерҳои роҳ
+{const P=[];roadLines.forEach(a=>roadLines.forEach(b=>P.push([a+11,b+11],[a-11,b-11])));const mk=(ge,m)=>new THREE.InstancedMesh(ge,m,P.length),po=mk(cy(.25,.3,7,6),ZM(0x333333)),he=mk(B3(1,2.6,1),ZM(0x111111)),la=mk(new THREE.SphereGeometry(.5,8,6),new THREE.MeshBasicMaterial({color:0xffffff})),d=new THREE.Object3D(),cc=new THREE.Color();
+ P.forEach((p,i)=>{d.position.set(p[0],3.5,p[1]);d.updateMatrix();po.setMatrixAt(i,d.matrix);d.position.set(p[0],7.6,p[1]);d.updateMatrix();he.setMatrixAt(i,d.matrix);d.position.set(p[0]+.55,7.6,p[1]);d.updateMatrix();la.setMatrixAt(i,d.matrix)});
+ [po,he,la].forEach(m=>{m.frustumCulled=false;scene.add(m)});
+ ZA.push((dt,t)=>{const k=Math.floor(t/6);if(k===ZG)return;ZG=k;P.forEach((p,i)=>la.setColorAt(i,cc.setHex(((i>>1)+k)%2?0x20ff40:0xff2020)));la.instanceColor.needsUpdate=true})}
+{const t=tex('Miiirzozodaa','потписация кунед','#ff0055','#ffffff');[-150,0,150].forEach(r=>[-225,225].forEach(a=>{[0,1].forEach(o=>{const g=new THREE.Group(),sx=o?1:0;
+ [-10,10].forEach(s=>ZB(g,cy(.5,.6,10,8),ZM(0x44485a),o?a+0:a,5,0).position.set(o?a+s:a,5,o?r:r+s));
+ ZB(g,B3(o?20.6:.6,.6,o?.6:20.6),ZM(0x44485a),o?a:a,10,o?r:r);const b=ban(t,18,4.5);b.position.set(a,6.8,r);b.rotation.y=o?0:Math.PI/2;g.add(b);scene.add(g)})}))}
+[-300,-150,0,150,300].forEach((zr,j)=>{for(let i=0;i<2;i++){const p=lego(Math.random()*0xffffff);p.position.set(0,0,zr);scene.add(p);const ph=i*3+j;ZA.push((d,t)=>{p.position.x=Math.sin(t*.6+ph)*7;p.rotation.y=Math.cos(t*.6+ph)>0?Math.PI/2:-Math.PI/2})}});
+// --- фурудгоҳ (шимолу шарқ), бандар (ҷанубу ғарб), қалъаи Ҳисор (шимолу ғарб) — ҳама дар дохили харита
+{const g=new THREE.Group();g.position.set(300,0,-375);scene.add(g);
+ ZB(g,B3(300,.3,26),ZM(0x303038),0,.2,0);for(let i=-7;i<=7;i++)ZB(g,B3(9,.05,1),WH,i*20,.4,0);ZB(g,B3(140,.3,30),ZM(0x3a3a44),0,.2,30);
+ ZB(g,B3(70,10,14),ZM(0xe8e8f0),-10,5,52);ZB(g,B3(72,1,16),ZM(0x2a8fd0),-10,10.5,52);ZB(g,cy(2.2,2.8,24,10),WH,50,12,52);ZB(g,cy(4.5,2.8,4,10),ZM(0x2a8fd0),50,26,52);
+ [[-50,1.2,0xffffff],[-10,1.9,0xffd02a],[30,.4,0xd62828]].forEach(a=>{const p=plane(a[2]);p.position.set(a[0],.3,30);p.rotation.y=a[1];g.add(p)});
+ const b=ban(tex('ФУРУДГОҲИ','БАЙНАЛМИЛАЛИИ ДУШАНБЕ','#0a3a5a','#7fe0ff'),30,7.5);b.position.set(-10,14,59.6);g.add(b);reg(290,-323,70,14,'ФУРУДГОҲ','ДУШАНБЕ',0xe8e8f0);
+ const fp=plane(0xffffff);scene.add(fp);ZA.push((d,t)=>{const w=t*.15;fp.position.set(300+Math.cos(w)*200,90,-375+Math.sin(w)*200);fp.rotation.set(0,Math.atan2(-Math.sin(w),Math.cos(w)),.25)});
+ const hp=heli(0xd62828);scene.add(hp);ZA.push((d,t)=>{const w=t*.35;hp.position.set(Math.cos(w)*110,60,Math.sin(w)*110);hp.rotation.y=Math.atan2(-Math.sin(w),Math.cos(w))})}
+{const g=new THREE.Group();g.position.set(-300,0,380);scene.add(g);const w=ZB(g,new THREE.PlaneGeometry(270,120),new THREE.MeshPhongMaterial({color:0x1e88c8,shininess:200}),0,.1,10);w.rotation.x=-Math.PI/2;
+ ZB(g,B3(270,1,10),ZM(0x888880),0,.5,-58);for(let i=0;i<20;i++)ZB(g,B3(8,4,4),ZM([0xd04a3a,0x3a8ad0,0xe0a030,0x3aa65a][i%4]),-95+i*10,2.5,-66+(i%2)*3);
+ [-60,0,60].forEach(x=>{[-6,6].forEach(o=>ZB(g,B3(1,22,1),ZM(0xd62828),x+o,11,-52));ZB(g,B3(14,1.2,1.5),ZM(0xd62828),x,22,-52)});
+ const s1=ship(),s2=ship();s1.position.set(-40,.5,-10);s2.position.set(60,.5,30);s2.rotation.y=Math.PI;g.add(s1,s2);ZA.push((d,t)=>{s1.position.x=-40+Math.sin(t*.2)*60;s2.position.x=60-Math.sin(t*.15)*50});
+ const b=ban(tex('БАНДАРИ','ДАРЁӢ — КИШТИҲО','#0a3a5a','#7fe0ff'),30,7.5);b.position.set(0,18,-72);g.add(b);reg(-300,380,270,120,'БАНДАР','КИШТИҲО',0x1e88c8,1)}
+{const X=-300,Z=-375,g=new THREE.Group(),st=ZM(0xb88a5a),dk=ZM(0xa87a4a),roof=ZM(0x7a3a2a);g.position.set(X,0,Z);scene.add(g);
+ const fl=ZB(g,new THREE.PlaneGeometry(116,66),ZM(0xd8c49a),0,.15,0);fl.rotation.x=-Math.PI/2;const mp=[];
+ [[0,-35,120,3],[-60,0,3,70],[60,0,3,70],[-36,35,48,3],[36,35,48,3]].forEach(a=>{ZB(g,B3(a[2],10,a[3]),st,a[0],5,a[1]);colliders.push({minX:X+a[0]-a[2]/2,maxX:X+a[0]+a[2]/2,minZ:Z+a[1]-a[3]/2,maxZ:Z+a[1]+a[3]/2});
+  if(a[2]>a[3])for(let x=a[0]-a[2]/2+1.5;x<a[0]+a[2]/2;x+=3.2)mp.push([x,a[1]]);else for(let z=a[1]-a[3]/2+1.5;z<a[1]+a[3]/2;z+=3.2)mp.push([a[0],z])});
+ const mm=new THREE.InstancedMesh(B3(1.6,1.8,1.4),st,mp.length),d=new THREE.Object3D();mp.forEach((p,i)=>{d.position.set(p[0],10.9,p[1]);d.updateMatrix();mm.setMatrixAt(i,d.matrix)});g.add(mm);
+ [[-60,-35],[60,-35],[-60,35],[60,35]].forEach(p=>{ZB(g,cy(5,6,20,12),dk,p[0],10,p[1]);ZB(g,new THREE.ConeGeometry(6.5,8,12),roof,p[0],24,p[1])});
+ [-12,12].forEach(x=>{ZB(g,cy(4.5,5.5,24,12),dk,x,12,35);ZB(g,new THREE.SphereGeometry(5.2,12,8,0,6.3,0,1.58),ZM(0x1ab5a0),x,24,35)});
+ ZB(g,B3(20,7,5),st,0,20.5,35);colliders.push({minX:X-17,maxX:X-7,minZ:Z+30,maxZ:Z+40},{minX:X+7,maxX:X+17,minZ:Z+30,maxZ:Z+40});
+ ZB(g,B3(20,28,20),st,0,14,-12);ZB(g,B3(22,2,22),dk,0,29,-12);ZB(g,new THREE.ConeGeometry(14,9,4),roof,0,34.5,-12);colliders.push({minX:X-10,maxX:X+10,minZ:Z-22,maxZ:Z-2});
+ const b=ban(tex('ҚАЛЪАИ ҲИСОР','ИСТГОҲИ БОСТОНӣ · ДАРВОЗА','#4a2a10','#f5c518'),22,5.5);b.position.set(0,20.5,37.7);g.add(b);flag(g,-20,-20);flag(g,20,-20);
+ for(let i=0;i<3;i++){const p=lego(Math.random()*0xffffff);p.position.set(-8+i*8,0,50);g.add(p)}
+ reg(X,Z,120,70,'ҚАЛЪАИ ҲИСОР','ИСТГОҲИ БОСТОНӣ',0xb88a5a,1)}
+{const n=500,a=new Float32Array(n*3);for(let i=0;i<n;i++){const u=Math.random()*6.283,v=Math.random()*.95+.05,r=Math.sqrt(1-v*v)*1700;a[i*3]=Math.cos(u)*r;a[i*3+1]=v*1700;a[i*3+2]=Math.sin(u)*r}
+ const ge=new THREE.BufferGeometry();ge.setAttribute('position',new THREE.BufferAttribute(a,3));window.__zst=new THREE.Points(ge,window.__zsm=new THREE.PointsMaterial({color:0xffffff,size:2.2,sizeAttenuation:false,transparent:true,fog:false}));__zst.frustumCulled=false;scene.add(__zst)}
+// --- автобусҳои сурхи дудабақа, милиса, ёрии таъҷилӣ, обпошак
+function zbar(g,y){const a=new THREE.MeshBasicMaterial({color:0xff2020}),b=new THREE.MeshBasicMaterial({color:0x2060ff}),o=new THREE.Group();[[a,-.5],[b,.5]].forEach(q=>{const l=new THREE.Mesh(B3(.9,.3,.4),q[0]);l.position.x=q[1];o.add(l)});o.position.set(0,y,0);g.add(o);ZL.push([a,b]);return o}
+const last=()=>trafficCars[trafficCars.length-1];
+for(let i=0;i<4;i++){createTrafficCar(0xd62020);const c=last();ZB(c,B3(2.4,1.3,4.2),ZM(0xd62020),0,2.2,0);ZB(c,B3(2.5,.7,3.8),ZM(0x223344),0,2.3,0);c.userData.speed=9}
+['p','a','w','p','a'].forEach(k=>{createTrafficCar(k==='w'?0x2a7fd0:0xf2f2f2);const c=last();
+ if(k==='a')[-1.26,1.26].forEach(x=>{ZB(c,B3(.05,1.2,.4),ZM(0xd62828),x,1.3,-.4);ZB(c,B3(.05,.4,1.2),ZM(0xd62828),x,1.3,-.4)});
+ if(k==='p')[-1.26,1.26].forEach(x=>ZB(c,B3(.05,.5,5),ZM(0x1a3a9a),x,.95,0));
+ if(k==='w'){c.scale.set(1.2,1.25,1.3);ZB(c,cy(1,1,4,10),ZM(0xdddddd),0,2.5,-.6).rotation.x=Math.PI/2;[-1,1].forEach(x=>ZB(c,new THREE.ConeGeometry(.9,3,8,1,true),new THREE.MeshBasicMaterial({color:0xaee4ff,transparent:true,opacity:.35,side:DBL}),x*1.2,1,-4.2).rotation.x=-Math.PI/2.4)}else zbar(c,2.1)});
+// --- клавишаҳо: V = камераи 360°, P = режими милиса
+addEventListener('keydown',e=>{if(e.code==='KeyV')ZS^=1;if(e.code==='KeyP'){ZP^=1;if(ZP&&!zpb)zpb=zbar(playerCar,1.55);if(zpb)zpb.visible=!!ZP;const w=document.getElementById('wanted');w.innerText=ZP?'МИЛИСА: посбонӣ':'Ором';w.style.color=ZP?'#4da3ff':'#00ffcc'}});
+const ui=document.getElementById('ui');if(ui)ui.insertAdjacentHTML('afterbegin','<div style="font-size:12px;color:#9ee">v2 · V — камераи 360° · P — режими милиса</div>');
+// --- рӯз/шаб, офтоб, абр, ситора
+const zN=[0x02040f,0x0a1030,0x101a40].map(c=>new THREE.Color(c)),zD=[0x2f7fd8,0x8cc8f0,0xbfe3f7].map(c=>new THREE.Color(c)),zU=new THREE.Color(0xff8a5a);
+function up(dt){ZT+=dt;const a=ZT/150*6.2832,e=Math.sin(a),dy=Math.max(0,Math.min(1,e*2.5+.35)),du=Math.max(0,1-Math.abs(e)*3.5),u=skyDome.material.uniforms;
+ ['top','mid','bottom'].forEach((k,i)=>u[k].value.copy(zN[i]).lerp(zD[i],dy));u.bottom.value.lerp(zU,du*.5);u.mid.value.lerp(zU,du*.25);
+ scene.background.copy(u.bottom.value);scene.fog.color.copy(u.bottom.value);ambientLight.intensity=.18+.67*dy;sunLight.intensity=1.2*dy;SUN_DIR.set(Math.cos(a),e,.4).normalize();sunGroup.visible=e>-.05;
+ __zst.position.copy(camera.position);__zsm.opacity=1-dy;windowMat.color.setHex(dy>.5?0xb9c7d6:0xffea85);lampMesh.material.color.setHex(dy>.5?0x888888:0xfff2b0);cloudMat.color.setScalar(.2+.8*dy);cloudMat.emissive.setScalar(.35*dy);
+ if(ZS){if(isInCar){camYaw+=dt*.9;lastCamMove=performance.now()}else controls.getObject().rotation.y+=dt*.9}
+ const f=Math.sin(ZT*14)>0;ZL.forEach(q=>{q[0].color.setHex(f?0xff2020:0x330000);q[1].color.setHex(f?0x001040:0x2a70ff)});ZA.forEach(fn=>fn(dt,ZT))}
+let lt=performance.now();(function L(t){requestAnimationFrame(L);const dt=Math.min(.1,(t-lt)/1000);lt=t;try{up(dt)}catch(e){zerr(e)}})(lt);
+})();
+
+}catch(e){zerr(e)}
+
     </script>
 </body>
 </html>
