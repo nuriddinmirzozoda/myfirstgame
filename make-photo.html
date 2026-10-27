@@ -1,0 +1,15 @@
+<!doctype html><html lang="tg"><head><meta charset="utf-8"><title>Сохтани photo.js</title>
+<style>body{font-family:Arial;background:#0b1d38;color:#fff;max-width:560px;margin:30px auto;padding:0 16px}input,button{font-size:16px;padding:9px;margin:6px 0;width:100%;box-sizing:border-box;border-radius:8px;border:0}input[type=text]{background:#fff}button{background:#ffd45a;font-weight:bold;cursor:pointer}canvas{width:200px;height:200px;border:3px solid #ffd45a;border-radius:10px;display:block;margin:10px 0}</style></head><body>
+<h2>📷 Сурати шумо барои офис</h2>
+<p>1) Суратро интихоб кунед. 2) «Сохтани photo.js» -ро зер кунед. 3) Файли боргиршударо ба ҷои photo.js дар ҷузвдони бозӣ гузоред.</p>
+<input type="file" id="f" accept="image/*"><input type="text" id="n" value="Нуриддин" placeholder="Ном"><input type="text" id="t" value="Web Developer · GTA Dushanbe 3D" placeholder="Касб ё шиор">
+<canvas id="c" width="600" height="600"></canvas><button id="b">⬇ Сохтани photo.js</button><p id="m"></p>
+<script>
+let img=null;const c=document.getElementById('c'),q=c.getContext('2d');
+document.getElementById('f').onchange=e=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{img=i;const s=Math.max(600/i.width,600/i.height),w=i.width*s,h=i.height*s;q.fillStyle='#fff';q.fillRect(0,0,600,600);q.drawImage(i,(600-w)/2,(600-h)/2,w,h)};i.src=r.result};r.readAsDataURL(e.target.files[0])};
+document.getElementById('b').onclick=()=>{if(!img){document.getElementById('m').textContent='Аввал сурат интихоб кунед';return}
+ const o=document.createElement('canvas');o.width=o.height=800;const x=o.getContext('2d'),s=Math.max(800/img.width,800/img.height),w=img.width*s,h=img.height*s;x.drawImage(img,(800-w)/2,(800-h)/2,w,h);
+ const url=o.toDataURL('image/jpeg',.88);
+ const js='window.OFFICE='+JSON.stringify({name:document.getElementById('n').value,title:document.getElementById('t').value,photo:url})+';\n';
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'text/javascript'}));a.download='photo.js';a.click();document.getElementById('m').textContent='Тайёр! photo.js-ро ба ҷузвдони бозӣ гузоред.'};
+</script></body></html>
